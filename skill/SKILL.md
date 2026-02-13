@@ -29,7 +29,24 @@ Core capabilities: VisionKV™ visual system (complete visual collections from a
 
 **Credit costs**: 1K/2K image = 1 credit, 4K image = 2 credits, short video = 5 credits, copy = 1 credit.
 
-Install: `npm install -g vibesku`
+## Setup
+
+The CLI is bundled with this skill at `bin/vibesku.js` — a self-contained Node.js script with zero external dependencies (requires Node.js >= 18).
+
+**Determine the CLI path** relative to this skill's install location:
+
+```bash
+# The bundled CLI path (relative to this SKILL.md):
+node <skill-dir>/bin/vibesku.js --help
+```
+
+**Optional**: Create a shell alias for convenience:
+
+```bash
+alias vibesku="node <skill-dir>/bin/vibesku.js"
+```
+
+When running commands in this document, replace `vibesku` with `node <skill-dir>/bin/vibesku.js` if the global command is not available.
 
 ## Authentication
 

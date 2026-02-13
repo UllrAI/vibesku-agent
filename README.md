@@ -1,43 +1,25 @@
-# UllrAI Skills
+# VibeSKU Agent
 
-Reusable agent skills for [UllrAI](https://ullr.ai) products. Each skill is a directory containing a `SKILL.md` with YAML frontmatter and optional reference files.
+Agent skill for [VibeSKU](https://www.vibesku.com) — AI-powered creative automation that turns product SKU photos into professional e-commerce visuals and marketplace-ready copy.
 
-## Available Skills
-
-| Skill | Description |
-|-------|-------------|
-| [vibesku](skills/vibesku) | AI-powered creative automation that turns product SKU photos into professional e-commerce visuals and marketplace-ready copy |
-
-## Skill Structure
+## Structure
 
 ```
-skills/
-└── <skill-name>/
-    ├── SKILL.md              # Skill definition (YAML frontmatter + instructions)
-    └── references/           # Optional supporting docs
-        └── *.md
+skill/                     # Installed by `npx skills add`
+├── SKILL.md               # Skill definition
+├── bin/
+│   └── vibesku.js         # Bundled CLI (self-contained, zero npm dependencies)
+└── references/
+    └── commands.md        # Full command reference
 ```
 
 ## Installation
 
-Install any skill using the [Skills CLI](https://github.com/vercel-labs/skills):
-
 ```bash
-npx skills add ullrai/skills
+npx skills add ullrai/vibesku-agent
 ```
 
-Or install a specific skill:
-
-```bash
-npx skills add ullrai/skills/skills/vibesku
-```
-
-## Creating a New Skill
-
-1. Create a directory under `skills/` with your skill name
-2. Add a `SKILL.md` with YAML frontmatter (`name` and `description` fields)
-3. Add any reference docs in a `references/` subdirectory
-4. Update this README's skill table
+The CLI is bundled with the skill — no separate `npm install` required. Requires Node.js >= 18.
 
 ## License
 

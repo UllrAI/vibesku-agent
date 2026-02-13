@@ -1,6 +1,6 @@
-# UllrAI Skills
+# VibeSKU Agent
 
-Agent skills repository for [UllrAI](https://ullr.ai) products — reusable instruction sets that extend AI coding agent capabilities.
+VibeSKU agent skill repository — AI-powered e-commerce creative automation.
 
 ## Project Structure
 
@@ -8,21 +8,16 @@ Agent skills repository for [UllrAI](https://ullr.ai) products — reusable inst
 ├── CLAUDE.md              # Project instructions (this file)
 ├── AGENTS.md              # Symlink → CLAUDE.md
 ├── README.md              # Project overview
-├── skills/                # All skills live here
-│   └── <skill-name>/
-│       ├── SKILL.md       # Skill definition (YAML frontmatter + Markdown)
-│       └── references/    # Detailed reference docs
+├── skill/                 # Skill content (installed by `npx skills add`)
+│   ├── SKILL.md           # Skill definition (YAML frontmatter + Markdown)
+│   ├── bin/
+│   │   └── vibesku.js     # Bundled CLI (self-contained, zero dependencies)
+│   └── references/
+│       └── commands.md    # Full command reference
 └── .gitignore
 ```
 
-## Skill Specification
+## Notes
 
-- Each skill is a self-contained directory under `skills/`
-- `SKILL.md` must include YAML frontmatter with `name` and `description` fields
-- `description` should list trigger keywords for agent discovery
-- Detailed docs go in a `references/` subdirectory
-- Directory names use kebab-case
-
-## Current Skills
-
-- **vibesku** — AI-powered e-commerce creative automation (hero/KV images, listing copy)
+- `bin/vibesku.js` is a pre-built CLI artifact from the VibeSKU monorepo — do not edit directly
+- To update the CLI, rebuild in the VibeSKU repo (with commander bundled, CJS format) and copy the output here
