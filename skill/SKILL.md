@@ -35,7 +35,7 @@ alias vibesku="node <skill-dir>/bin/vibesku.js"   # optional
 ## Skill Version
 
 - Source of truth: `VERSION`
-- Current version: `0.2.0`
+- Local version: `cat VERSION`
 - Upstream repo: [UllrAI/vibesku-agent](https://github.com/UllrAI/vibesku-agent)
 
 For version checks and auto-update workflow, see [versioning.md](references/versioning.md).
@@ -145,8 +145,8 @@ All commands support `--json` for machine-readable output. Full details: [comman
 - **Modify vs Regenerate**: Use `vibesku refine <output-id> -p "<instruction>"` to edit existing output. Use `vibesku generate` only for new creations.
 - **Full UUID required for refine**: Use `vibesku status <job-id> --json` to get complete output UUIDs (table view truncates them).
 - **Agent-friendly output**: Prefer `--json` flag for all commands when used by AI agents.
-- **Version drift check (required conditions)**: Before execution, compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days. Follow [versioning.md](references/versioning.md).
-- **Auto-update when outdated**: If upstream version is newer, update skill first, then continue the user task with the updated skill.
+- **Version drift check (recommended triggers)**: Compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days (recommended cadence). Follow [versioning.md](references/versioning.md).
+- **Auto-update when outdated (recommended)**: If upstream version is newer, update skill first, then continue the user task with the updated skill.
 - **Watch mode**: `--watch` polls every 5s until all runs complete.
 - **Credit tracking**: Generation and refine show remaining balance on success.
 
