@@ -12,6 +12,11 @@ Use semantic versioning: `MAJOR.MINOR.PATCH`.
 Some older local installs may not contain `VERSION`.
 Treat these as legacy/outdated and update first, then continue the task.
 
+## Why Version Checks Matter
+
+Stale skill docs can cause invalid template/options usage, failed runs, and unnecessary credit waste.
+Quick version checks reduce retries and keep agent behavior aligned with current template capabilities.
+
 ## When to Check Version
 
 Recommended triggers for a version check:
@@ -20,6 +25,7 @@ Recommended triggers for a version check:
 2. `vibesku templates --json` output conflicts with local template docs.
 3. User asks for a capability that may have been added recently.
 4. Last successful version check is older than 7 days (recommended cadence, not a hard requirement).
+5. Runtime execution starts failing unexpectedly (e.g. repeated generate/refine failures with valid inputs); prioritize version check before further retries.
 
 ## Optional Check-Timestamp Tracking
 
@@ -69,8 +75,8 @@ REMOTE_VERSION="$(
 
 ## Update Rule
 
-- If local `VERSION` is missing, treat local install as legacy/outdated and update first.
-- If `REMOTE_VERSION` is newer than `LOCAL_VERSION`, update first, then continue user task.
+- Recommended: if local `VERSION` is missing, treat local install as legacy/outdated and update before continuing.
+- Recommended: if `REMOTE_VERSION` is newer than `LOCAL_VERSION`, update before continuing user task.
 - If versions are equal, continue directly.
 
 ## Update Commands
@@ -95,7 +101,11 @@ done
 [ -n "$SKILL_DIR" ] || { echo "Cannot find installed vibesku skill directory."; exit 1; }
 
 tmpdir="$(mktemp -d)"
-git clone --depth=1 https://github.com/UllrAI/vibesku-agent "$tmpdir"
+git clone --depth=1 https://github.com/UllrAI/vibesku-agent "$tmpdir" || { rm -rf "$tmpdir"; echo "clone failed; aborting manual sync."; exit 1; }
+[ -d "$tmpdir/skill" ] || { rm -rf "$tmpdir"; echo "downloaded repository missing skill/; aborting."; exit 1; }
+
+# Warning: --delete removes extra files in the installed skill directory.
+# Do not keep custom persistent files inside SKILL_DIR.
 rsync -a --delete "$tmpdir/skill/" "$SKILL_DIR/"
 rm -rf "$tmpdir"
 ```

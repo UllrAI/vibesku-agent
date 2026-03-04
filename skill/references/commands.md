@@ -136,7 +136,7 @@ vibesku generate -t ecom-hero \
 vibesku generate -t kv-image-set \
   -n "Smart Watch" \
   -i watch.png \
-  -o '{"style":"premium","aspectRatio":"3:4"}'
+  -o '{"style":"tech-future","aspectRatio":"3:4"}'
 
 # Exploded technical infographic
 vibesku generate -t exploded-view \

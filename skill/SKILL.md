@@ -10,7 +10,8 @@ description: |
   (6) run batch generation across a product catalog, (7) manage credits (check balance, purchase, redeem),
   (8) configure CLI settings. Triggers on mentions of "vibesku", "product visuals", "SKU photos",
   "ecommerce images", "hero banner", "listing copy", "product image generation", "batch generation",
-  "VisionKV", or any VibeSKU CLI workflow.
+  "VisionKV", "exploded view", "product infographic", "component breakdown", "technical diagram",
+  or any VibeSKU CLI workflow.
 ---
 
 # VibeSKU CLI
@@ -99,7 +100,7 @@ User wants text?
 | Food, home goods | `lifestyle` | `retro-film` | `lifestyle-soft` |
 | Organic, eco-friendly | `organic` | `organic-nature` | `material-focus` |
 | Fashion, beauty | `minimal` | `nordic-minimal` | `studio-minimal` |
-| Kids, sports, bold | `vibrant` | `cyberpunk` | `studio-minimal` |
+| Kids, sports, bold | `vibrant` | `cyberpunk` | `auto` (recommended) |
 | Artisan, handmade | `studio` | `watercolor` | `material-focus` |
 | Unsure / let AI decide | `auto` (default) | `auto` (default) | `auto` (default) |
 
@@ -145,7 +146,7 @@ All commands support `--json` for machine-readable output. Full details: [comman
 - **Modify vs Regenerate**: Use `vibesku refine <output-id> -p "<instruction>"` to edit existing output. Use `vibesku generate` only for new creations.
 - **Full UUID required for refine**: Use `vibesku status <job-id> --json` to get complete output UUIDs (table view truncates them).
 - **Agent-friendly output**: Prefer `--json` flag for all commands when used by AI agents.
-- **Version drift check (recommended triggers)**: Compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days (recommended cadence). Follow [versioning.md](references/versioning.md).
+- **Version drift check (recommended triggers)**: Compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days (recommended cadence). If issues occur during execution, prioritize this check before retrying generation/refine commands. Follow [versioning.md](references/versioning.md).
 - **Auto-update when outdated (recommended)**: If upstream version is newer, update skill first, then continue the user task with the updated skill.
 - **Watch mode**: `--watch` polls every 5s until all runs complete.
 - **Credit tracking**: Generation and refine show remaining balance on success.
