@@ -3,14 +3,15 @@ name: vibesku
 description: |
   CLI for VibeSKU — an AI-powered creative automation platform that turns product SKU photos
   into professional e-commerce visuals and marketplace-ready copy at scale.
-  Use when the user wants to: (1) generate hero banners, detail page poster sets, or listing copy
+  Use when the user wants to: (1) generate hero banners, exploded-view infographics, detail page poster sets, or listing copy
   from product photos via the command line, (2) authenticate with VibeSKU (browser login or API key),
-  (3) browse or inspect generation templates (ecom-hero, kv-image-set, listing),
+  (3) browse or inspect generation templates (ecom-hero, kv-image-set, exploded-view, listing),
   (4) refine AI-generated outputs with edit instructions, (5) export/download image and text results,
   (6) run batch generation across a product catalog, (7) manage credits (check balance, purchase, redeem),
   (8) configure CLI settings. Triggers on mentions of "vibesku", "product visuals", "SKU photos",
   "ecommerce images", "hero banner", "listing copy", "product image generation", "batch generation",
-  "VisionKV", or any VibeSKU CLI workflow.
+  "VisionKV", "exploded view", "product infographic", "component breakdown", "technical diagram",
+  or any VibeSKU CLI workflow.
 ---
 
 # VibeSKU CLI
@@ -32,6 +33,14 @@ node <skill-dir>/bin/vibesku.js --help
 alias vibesku="node <skill-dir>/bin/vibesku.js"   # optional
 ```
 
+## Skill Version
+
+- Source of truth: `VERSION`
+- Local version: `cat VERSION`
+- Upstream repo: [UllrAI/vibesku-agent](https://github.com/UllrAI/vibesku-agent)
+
+For version checks and auto-update workflow, see [versioning.md](references/versioning.md).
+
 ## Authentication
 
 Two methods, resolved in priority order:
@@ -48,19 +57,24 @@ vibesku init vsk_<key>            # API key for CI/CD
 
 ## Template Selection Guide
 
-VibeSKU provides 3 templates. **Read the corresponding reference file before building the generate command.**
+VibeSKU provides 4 templates. **Read the corresponding reference file before building the generate command.**
 
 | Need | Template | Output | Cost | Reference |
 |------|----------|--------|------|-----------|
 | Single product image (main photo, banner, poster) | `ecom-hero` | IMAGE | 1-2 cr/img | [ecom-hero.md](references/ecom-hero.md) |
 | Coordinated detail-page poster set | `kv-image-set` | IMAGE | 1-2 cr/img × scenes | [kv-image-set.md](references/kv-image-set.md) |
+| Single technical exploded infographic | `exploded-view` | IMAGE | 1-2 cr/img | [exploded-view.md](references/exploded-view.md) |
 | Product listing copy (title, bullets, description) | `listing` | TEXT | 1 cr | [listing.md](references/listing.md) |
 
 ### Decision Tree
 
 ```
 User wants visuals?
-├── Single image → ecom-hero
+├── Technical exploded infographic → exploded-view
+│   ├── Balanced callouts (default) → labelPlacement: balanced-callout
+│   ├── Cleaner visual without labels → labelPlacement: none
+│   └── Category-aware environment → backgroundMode: product-matched-scene
+├── Single image (hero/banner/poster) → ecom-hero
 │   ├── Product main photo → scenario: MAIN_IMAGE, aspectRatio: 1:1
 │   ├── Marketing banner  → scenario: BANNER, aspectRatio: 16:9
 │   └── Vertical poster   → scenario: POSTER, aspectRatio: 3:4
@@ -79,16 +93,16 @@ User wants text?
 
 ### Quick Style Matching (image templates)
 
-| Product Type | ecom-hero `style` | kv-image-set `style` |
-|-------------|-------------------|---------------------|
-| Electronics, gadgets | `tech` | `tech-future` |
-| Luxury, high-end | `premium` | `magazine` |
-| Food, home goods | `lifestyle` | `retro-film` |
-| Organic, eco-friendly | `organic` | `organic-nature` |
-| Fashion, beauty | `minimal` | `nordic-minimal` |
-| Kids, sports, bold | `vibrant` | `cyberpunk` |
-| Artisan, handmade | `studio` | `watercolor` |
-| Unsure / let AI decide | `auto` (default) | `auto` (default) |
+| Product Type | ecom-hero `style` | kv-image-set `style` | exploded-view `style` |
+|-------------|-------------------|---------------------|------------------------|
+| Electronics, gadgets | `tech` | `tech-future` | `premium-technical` |
+| Luxury, high-end | `premium` | `magazine` | `morandi-editorial` |
+| Food, home goods | `lifestyle` | `retro-film` | `lifestyle-soft` |
+| Organic, eco-friendly | `organic` | `organic-nature` | `material-focus` |
+| Fashion, beauty | `minimal` | `nordic-minimal` | `studio-minimal` |
+| Kids, sports, bold | `vibrant` | `cyberpunk` | `auto` (recommended) |
+| Artisan, handmade | `studio` | `watercolor` | `material-focus` |
+| Unsure / let AI decide | `auto` (default) | `auto` (default) | `auto` (default) |
 
 ---
 
@@ -97,14 +111,15 @@ User wants text?
 ```bash
 vibesku auth login                              # 1. Authenticate
 vibesku templates                               # 2. Browse templates
-vibesku credits                                 # 3. Check balance
+vibesku templates info exploded-view            # 3. Inspect template details (optional)
+vibesku credits                                 # 4. Check balance
 vibesku generate -t ecom-hero \
   -n "Wireless Headphones" \
   -i product.jpg -l logo.png \
-  -b "AudioTech"                                # 4. Generate visuals
-vibesku status <job-id> --watch                 # 5. Monitor until complete
-vibesku refine <output-uuid> -p "brighter bg"   # 6. Refine (optional)
-vibesku export <job-id> -o ./output             # 7. Download results
+  -b "AudioTech"                                # 5. Generate visuals
+vibesku status <job-id> --watch                 # 6. Monitor until complete
+vibesku refine <output-uuid> -p "brighter bg"   # 7. Refine (optional)
+vibesku export <job-id> -o ./output             # 8. Download results
 ```
 
 ## Commands Quick Reference
@@ -131,6 +146,8 @@ All commands support `--json` for machine-readable output. Full details: [comman
 - **Modify vs Regenerate**: Use `vibesku refine <output-id> -p "<instruction>"` to edit existing output. Use `vibesku generate` only for new creations.
 - **Full UUID required for refine**: Use `vibesku status <job-id> --json` to get complete output UUIDs (table view truncates them).
 - **Agent-friendly output**: Prefer `--json` flag for all commands when used by AI agents.
+- **Version drift check (recommended triggers)**: Compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days (recommended cadence). If issues occur during execution, prioritize this check before retrying generation/refine commands. Follow [versioning.md](references/versioning.md).
+- **Auto-update when outdated (recommended)**: If upstream version is newer, update skill first, then continue the user task with the updated skill.
 - **Watch mode**: `--watch` polls every 5s until all runs complete.
 - **Credit tracking**: Generation and refine show remaining balance on success.
 
