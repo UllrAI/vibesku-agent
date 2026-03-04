@@ -29,49 +29,18 @@ Recommended triggers for a version check:
 
 ## Optional Check-Timestamp Tracking
 
-Use a lightweight cache file if your agent can persist local state:
-
-```bash
-CHECK_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/vibesku/version-check"
-
-# stale if missing or older than 7 days
-if [ ! -f "$CHECK_FILE" ] || find "$CHECK_FILE" -mtime +7 -print -quit | grep -q .; then
-  echo "version check recommended"
-fi
-
-# mark successful check time
-mkdir -p "$(dirname "$CHECK_FILE")"
-touch "$CHECK_FILE"
-```
+If your agent can persist local state, store a lightweight "last version check timestamp".
+Any cache/state backend is acceptable (file, key-value store, runtime memory with persistence).
+If the state is missing or older than 7 days, treat a version check as recommended.
 
 If your runtime does not persist local state, treat the 7-day rule as best effort.
 
 ## How to Compare Local vs Upstream
 
-```bash
-# local (inside skill folder)
-if [ -f VERSION ]; then
-  LOCAL_VERSION="$(cat VERSION)"
-else
-  LOCAL_VERSION="0.0.0"
-  echo "local VERSION missing (legacy install); update recommended before continuing."
-fi
-
-# upstream
-REMOTE_VERSION="$(curl -fsSL https://raw.githubusercontent.com/UllrAI/vibesku-agent/main/skill/VERSION)"
-
-echo "local=$LOCAL_VERSION remote=$REMOTE_VERSION"
-```
-
-Optional GitHub CLI method:
-
-```bash
-REMOTE_VERSION="$(
-  gh api repos/UllrAI/vibesku-agent/contents/skill/VERSION?ref=main --jq '.content' \
-    | tr -d '\n' \
-    | { base64 --decode 2>/dev/null || base64 -D; }
-)"
-```
+1. Read local skill version from installed skill `VERSION`.
+2. If local `VERSION` is missing, treat local version as legacy/outdated.
+3. Read upstream version from `https://raw.githubusercontent.com/UllrAI/vibesku-agent/main/skill/VERSION`.
+4. Compare semantic versions (`MAJOR.MINOR.PATCH`).
 
 ## Update Rule
 
