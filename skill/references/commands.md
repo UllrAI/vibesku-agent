@@ -103,6 +103,7 @@ Show detailed template spec: asset requirements, brief fields, options with defa
 ```bash
 vibesku templates info ecom-hero          # Human-readable
 vibesku templates info kv-image-set --json # JSON
+vibesku templates info exploded-view       # Exploded infographic template
 ```
 
 Output includes:
@@ -136,6 +137,12 @@ vibesku generate -t kv-image-set \
   -n "Smart Watch" \
   -i watch.png \
   -o '{"style":"premium","aspectRatio":"3:4"}'
+
+# Exploded technical infographic
+vibesku generate -t exploded-view \
+  -n "Ceramic Aroma Diffuser" \
+  -i diffuser.jpg \
+  -o '{"style":"premium-technical","layerDensity":"balanced","backgroundMode":"product-matched-scene","labelPlacement":"balanced-callout","aspectRatio":"3:4"}'
 
 # Text listing
 vibesku generate -t listing \

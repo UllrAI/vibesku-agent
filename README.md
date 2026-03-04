@@ -7,10 +7,13 @@ Agent skill for [VibeSKU](https://www.vibesku.com) — AI-powered creative autom
 ```
 skill/                     # Installed by `npx skills add`
 ├── SKILL.md               # Skill definition
+├── VERSION                # Skill semantic version (source of truth)
 ├── bin/
 │   └── vibesku.js         # Bundled CLI (self-contained, zero npm dependencies)
 └── references/
-    └── commands.md        # Full command reference
+    ├── commands.md        # Full command reference
+    ├── exploded-view.md   # Exploded-view template guide
+    └── versioning.md      # Version check + auto-update policy
 ```
 
 ## Installation
