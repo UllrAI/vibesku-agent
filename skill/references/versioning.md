@@ -79,61 +79,18 @@ REMOTE_VERSION="$(
 - Recommended: if `REMOTE_VERSION` is newer than `LOCAL_VERSION`, update before continuing user task.
 - If versions are equal, continue directly.
 
-## Update Commands
+## Update Guidance
 
-Preferred:
+Use the agent's native skill installation/update workflow instead of hardcoded shell commands.
+Reference source:
 
-```bash
-npx skills add ullrai/vibesku-agent
-```
+- Repository: `https://github.com/UllrAI/vibesku-agent`
+- Latest VERSION file: `https://raw.githubusercontent.com/UllrAI/vibesku-agent/main/skill/VERSION`
 
-Fallback (manual sync for the currently installed skill folder):
+## Post-Update Validation (Recommended)
 
-```bash
-SKILL_DIR=""
-for d in "$HOME/.codex/skills/vibesku" "$HOME/.agents/skills/vibesku"; do
-  [ -f "$d/SKILL.md" ] && SKILL_DIR="$d" && break
-done
+After updating, validate with your agent's normal runtime checks:
 
-[ -z "$SKILL_DIR" ] && [ -n "${CODEX_HOME:-}" ] && [ -f "$CODEX_HOME/skills/vibesku/SKILL.md" ] && SKILL_DIR="$CODEX_HOME/skills/vibesku"
-[ -z "$SKILL_DIR" ] && [ -n "${AGENTS_HOME:-}" ] && [ -f "$AGENTS_HOME/skills/vibesku/SKILL.md" ] && SKILL_DIR="$AGENTS_HOME/skills/vibesku"
-
-[ -n "$SKILL_DIR" ] || { echo "Cannot find installed vibesku skill directory."; exit 1; }
-
-tmpdir="$(mktemp -d)"
-git clone --depth=1 https://github.com/UllrAI/vibesku-agent "$tmpdir" || { rm -rf "$tmpdir"; echo "clone failed; aborting manual sync."; exit 1; }
-[ -d "$tmpdir/skill" ] || { rm -rf "$tmpdir"; echo "downloaded repository missing skill/; aborting."; exit 1; }
-
-# Warning: --delete removes extra files in the installed skill directory.
-# Do not keep custom persistent files inside SKILL_DIR.
-rsync -a --delete "$tmpdir/skill/" "$SKILL_DIR/"
-rm -rf "$tmpdir"
-```
-
-## Post-Update Validation
-
-```bash
-if [ -z "${SKILL_DIR:-}" ]; then
-  for d in "$HOME/.codex/skills/vibesku" "$HOME/.agents/skills/vibesku"; do
-    [ -f "$d/SKILL.md" ] && SKILL_DIR="$d" && break
-  done
-fi
-
-if [ -z "${SKILL_DIR:-}" ] && [ -n "${CODEX_HOME:-}" ] && [ -f "$CODEX_HOME/skills/vibesku/SKILL.md" ]; then
-  SKILL_DIR="$CODEX_HOME/skills/vibesku"
-fi
-
-if [ -z "${SKILL_DIR:-}" ] && [ -n "${AGENTS_HOME:-}" ] && [ -f "$AGENTS_HOME/skills/vibesku/SKILL.md" ]; then
-  SKILL_DIR="$AGENTS_HOME/skills/vibesku"
-fi
-
-[ -n "${SKILL_DIR:-}" ] || { echo "Cannot find installed vibesku skill directory."; exit 1; }
-
-test -f "$SKILL_DIR/VERSION" && cat "$SKILL_DIR/VERSION"
-```
-
-Confirm template docs include:
-- `ecom-hero`
-- `kv-image-set`
-- `exploded-view`
-- `listing`
+1. Confirm installed skill metadata shows a newer or expected version.
+2. Confirm template docs include `ecom-hero`, `kv-image-set`, `exploded-view`, and `listing`.
+3. Re-run the user task that triggered the version check and verify the mismatch/error is resolved.
