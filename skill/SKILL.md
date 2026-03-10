@@ -12,6 +12,19 @@ description: |
   "ecommerce images", "hero banner", "listing copy", "product image generation", "batch generation",
   "VisionKV", "exploded view", "product infographic", "component breakdown", "technical diagram",
   or any VibeSKU CLI workflow.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - VIBESKU_API_KEY
+        - VIBESKU_BASE_URL
+        - NO_COLOR
+      bins:
+        - node
+      config:
+        - ~/.vibesku/config.json
+    primaryEnv: VIBESKU_API_KEY
+    homepage: https://www.vibesku.com
 ---
 
 # VibeSKU CLI
