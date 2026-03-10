@@ -3350,6 +3350,7 @@ var {
 // src/client/auth.ts
 var import_config_store = require("./config-store.js");
 var import_file_asset = require("./file-asset.js");
+var import_batch_file = require("./batch-file.js");
 var DEFAULT_BASE_URL = "https://vibesku.com";
 function getConfigPath() {
   return (0, import_config_store.getConfigPath)();
@@ -4391,22 +4392,16 @@ var exportCommand = new Command("export").description("Download job outputs").ar
 );
 
 // src/commands/batch.ts
-var import_node_fs3 = require("fs");
 var batchCommand = new Command("batch").description("Run batch generation from a JSON file").argument("<file>", "Path to batch JSON file").option("--json", "Output results as JSON").option("--dry-run", "Validate the file without submitting").action(async (file, opts) => {
-  if (!(0, import_node_fs3.existsSync)(file)) {
-    logger.error(`File not found: ${file}`);
-    process.exit(1);
-  }
   let items;
   try {
-    const content = (0, import_node_fs3.readFileSync)(file, "utf-8");
-    items = JSON.parse(content);
-    if (!Array.isArray(items)) {
-      logger.error("Batch file must contain a JSON array.");
-      process.exit(1);
+    items = (0, import_batch_file.loadBatchItems)(file);
+  } catch (error) {
+    if (error instanceof Error) {
+      logger.error(error.message);
+    } else {
+      logger.error("Failed to parse batch file as JSON.");
     }
-  } catch {
-    logger.error("Failed to parse batch file as JSON.");
     process.exit(1);
   }
   logger.info(`Found ${items.length} items in batch file.`);
