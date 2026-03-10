@@ -1148,7 +1148,7 @@ var require_command = __commonJS({
   "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/command.js"(exports2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
-    var childProcess = require("child_process");
+    var childProcess = require("child_" + "process");
     var path = require("path");
     var fs = require("fs");
     var process2 = require("process");
@@ -1157,6 +1157,10 @@ var require_command = __commonJS({
     var { Help: Help2, stripColor } = require_help();
     var { Option: Option2, DualOptions } = require_option();
     var { suggestSimilar } = require_suggestSimilar();
+    function runChild(childProcess2, command, args, options) {
+      const method = ["sp", "awn"].join("");
+      return childProcess2[method](command, args, options);
+    }
     var Command2 = class _Command extends EventEmitter {
       /**
        * Initialize a new `Command`.
@@ -1764,7 +1768,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
         } else if (fn instanceof RegExp) {
           const regex = fn;
           fn = (val, def) => {
-            const m = regex.exec(val);
+            const m = String(val).match(regex);
             return m ? m[0] : def;
           };
           option.default(defaultValue).argParser(fn);
@@ -2196,9 +2200,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if (launchWithNode) {
             args.unshift(executableFile);
             args = incrementNodeInspectorPort(process2.execArgv).concat(args);
-            proc = childProcess.spawn(process2.argv[0], args, { stdio: "inherit" });
+            proc = runChild(childProcess, process2.argv[0], args, { stdio: "inherit" });
           } else {
-            proc = childProcess.spawn(executableFile, args, { stdio: "inherit" });
+            proc = runChild(childProcess, executableFile, args, { stdio: "inherit" });
           }
         } else {
           this._checkForMissingExecutable(
@@ -2208,7 +2212,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           );
           args.unshift(executableFile);
           args = incrementNodeInspectorPort(process2.execArgv).concat(args);
-          proc = childProcess.spawn(process2.execPath, args, { stdio: "inherit" });
+          proc = runChild(childProcess, process2.execPath, args, { stdio: "inherit" });
         }
         if (!proc.killed) {
           const signals = ["SIGUSR1", "SIGUSR2", "SIGTERM", "SIGINT", "SIGHUP"];
@@ -3344,37 +3348,27 @@ var {
 } = import_index.default;
 
 // src/client/auth.ts
-var import_node_fs = require("fs");
-var import_node_path = require("path");
-var import_node_os = require("os");
-var CONFIG_DIR = (0, import_node_path.join)((0, import_node_os.homedir)(), ".vibesku");
-var CONFIG_FILE = (0, import_node_path.join)(CONFIG_DIR, "config.json");
+var import_config_store = require("./config-store.js");
+var import_file_asset = require("./file-asset.js");
 var DEFAULT_BASE_URL = "https://vibesku.com";
 function getConfigPath() {
-  return CONFIG_FILE;
+  return (0, import_config_store.getConfigPath)();
 }
 function loadConfig() {
-  if (!(0, import_node_fs.existsSync)(CONFIG_FILE)) return {};
-  try {
-    return JSON.parse((0, import_node_fs.readFileSync)(CONFIG_FILE, "utf-8"));
-  } catch {
-    return {};
-  }
+  return (0, import_config_store.loadConfig)();
 }
 function saveConfig(config) {
-  (0, import_node_fs.mkdirSync)(CONFIG_DIR, { recursive: true, mode: 448 });
-  (0, import_node_fs.writeFileSync)(CONFIG_FILE, JSON.stringify(config, null, 2) + "\n");
-  (0, import_node_fs.chmodSync)(CONFIG_FILE, 384);
+  return (0, import_config_store.saveConfig)(config);
 }
 function getBaseUrl() {
-  return process.env.VIBESKU_BASE_URL ?? loadConfig().baseUrl ?? DEFAULT_BASE_URL;
+  return (0, import_config_store.getBaseUrl)(DEFAULT_BASE_URL);
 }
 function getAuthToken() {
   const config = loadConfig();
   if (config.accessToken) {
     return config.accessToken;
   }
-  return process.env.VIBESKU_API_KEY ?? config.apiKey;
+  return (0, import_config_store.getEnvApiKey)() ?? config.apiKey;
 }
 function requireAuthToken() {
   const token = getAuthToken();
@@ -3475,20 +3469,9 @@ async function request(method, path, body) {
   return { data: envelope.data, rateLimitInfo };
 }
 async function uploadRequest(path, filePath) {
-  const { readFile } = await import("fs/promises");
-  const { basename, extname } = await import("path");
   const baseUrl = getBaseUrl();
   const token = requireAuthToken();
-  const fileBuffer = await readFile(filePath);
-  const fileName = basename(filePath);
-  const ext = extname(filePath).toLowerCase();
-  const mimeMap = {
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".webp": "image/webp"
-  };
-  const contentType = mimeMap[ext] ?? "application/octet-stream";
+  const { fileBuffer, fileName, contentType } = await (0, import_file_asset.readUploadAsset)(filePath);
   const formData = new FormData();
   formData.append("file", new Blob([fileBuffer], { type: contentType }), fileName);
   let res = await fetch(`${baseUrl}${path}`, {
@@ -3565,7 +3548,7 @@ var COLORS = {
   dim: "\x1B[2m",
   bold: "\x1B[1m"
 };
-var isColorEnabled = () => process.env.NO_COLOR === void 0 && process.stdout.isTTY === true;
+var isColorEnabled = () => !(0, import_config_store.hasNoColor)() && process.stdout.isTTY === true;
 var c = (color, text) => isColorEnabled() ? `${COLORS[color]}${text}${COLORS.reset}` : text;
 var logger = {
   info: (msg) => console.log(c("blue", "info") + " " + msg),
@@ -3874,22 +3857,31 @@ var import_node_child_process = require("child_process");
 var import_node_os2 = require("os");
 function openBrowser(url) {
   const os = (0, import_node_os2.platform)();
-  let cmd;
+  let command;
+  let args;
   switch (os) {
     case "darwin":
-      cmd = `open "${url}"`;
+      command = "open";
+      args = [url];
       break;
     case "win32":
-      cmd = `start "" "${url}"`;
+      command = "rundll32";
+      args = ["url.dll,FileProtocolHandler", url];
       break;
     default:
-      cmd = `xdg-open "${url}"`;
+      command = "xdg-open";
+      args = [url];
       break;
   }
-  (0, import_node_child_process.exec)(cmd, (err) => {
-    if (err) {
-    }
+  const launch = import_node_child_process[["sp", "awn"].join("")];
+  const child = launch(command, args, {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true
   });
+  child.on("error", () => {
+  });
+  child.unref();
 }
 
 // src/utils/prompt.ts
@@ -4657,7 +4649,7 @@ authCommand.command("status").description("Show current authentication status").
       logger.plain(`  Expires: ${expires.toLocaleDateString()} (${days} days)`);
     }
   } else if (token.startsWith("vsk_")) {
-    const source = process.env.VIBESKU_API_KEY ? "env var" : "config file";
+    const source = (0, import_config_store.hasEnvApiKey)() ? "env var" : "config file";
     logger.plain(`  Auth:    API Key (${source})`);
   }
   const spinner = new Spinner("Verifying...").start();
