@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 "use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -1148,7 +1147,7 @@ var require_command = __commonJS({
   "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/command.js"(exports2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
-    var childProcess = require("child_" + "process");
+    var childProcess = require("child_process");
     var path = require("path");
     var fs = require("fs");
     var process2 = require("process");
@@ -1157,10 +1156,6 @@ var require_command = __commonJS({
     var { Help: Help2, stripColor } = require_help();
     var { Option: Option2, DualOptions } = require_option();
     var { suggestSimilar } = require_suggestSimilar();
-    function runChild(childProcess2, command, args, options) {
-      const method = ["sp", "awn"].join("");
-      return childProcess2[method](command, args, options);
-    }
     var Command2 = class _Command extends EventEmitter {
       /**
        * Initialize a new `Command`.
@@ -1768,7 +1763,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
         } else if (fn instanceof RegExp) {
           const regex = fn;
           fn = (val, def) => {
-            const m = String(val).match(regex);
+            const m = regex.exec(val);
             return m ? m[0] : def;
           };
           option.default(defaultValue).argParser(fn);
@@ -2200,9 +2195,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if (launchWithNode) {
             args.unshift(executableFile);
             args = incrementNodeInspectorPort(process2.execArgv).concat(args);
-            proc = runChild(childProcess, process2.argv[0], args, { stdio: "inherit" });
+            proc = childProcess.spawn(process2.argv[0], args, { stdio: "inherit" });
           } else {
-            proc = runChild(childProcess, executableFile, args, { stdio: "inherit" });
+            proc = childProcess.spawn(executableFile, args, { stdio: "inherit" });
           }
         } else {
           this._checkForMissingExecutable(
@@ -2212,7 +2207,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           );
           args.unshift(executableFile);
           args = incrementNodeInspectorPort(process2.execArgv).concat(args);
-          proc = runChild(childProcess, process2.execPath, args, { stdio: "inherit" });
+          proc = childProcess.spawn(process2.execPath, args, { stdio: "inherit" });
         }
         if (!proc.killed) {
           const signals = ["SIGUSR1", "SIGUSR2", "SIGTERM", "SIGINT", "SIGHUP"];
@@ -3348,28 +3343,37 @@ var {
 } = import_index.default;
 
 // src/client/auth.ts
-var import_config_store = require("./config-store.js");
-var import_file_asset = require("./file-asset.js");
-var import_batch_file = require("./batch-file.js");
+var import_node_fs = require("fs");
+var import_node_path = require("path");
+var import_node_os = require("os");
+var CONFIG_DIR = (0, import_node_path.join)((0, import_node_os.homedir)(), ".vibesku");
+var CONFIG_FILE = (0, import_node_path.join)(CONFIG_DIR, "config.json");
 var DEFAULT_BASE_URL = "https://vibesku.com";
 function getConfigPath() {
-  return (0, import_config_store.getConfigPath)();
+  return CONFIG_FILE;
 }
 function loadConfig() {
-  return (0, import_config_store.loadConfig)();
+  if (!(0, import_node_fs.existsSync)(CONFIG_FILE)) return {};
+  try {
+    return JSON.parse((0, import_node_fs.readFileSync)(CONFIG_FILE, "utf-8"));
+  } catch {
+    return {};
+  }
 }
 function saveConfig(config) {
-  return (0, import_config_store.saveConfig)(config);
+  (0, import_node_fs.mkdirSync)(CONFIG_DIR, { recursive: true, mode: 448 });
+  (0, import_node_fs.writeFileSync)(CONFIG_FILE, JSON.stringify(config, null, 2) + "\n");
+  (0, import_node_fs.chmodSync)(CONFIG_FILE, 384);
 }
 function getBaseUrl() {
-  return (0, import_config_store.getBaseUrl)(DEFAULT_BASE_URL);
+  return process.env.VIBESKU_BASE_URL ?? loadConfig().baseUrl ?? DEFAULT_BASE_URL;
 }
 function getAuthToken() {
   const config = loadConfig();
   if (config.accessToken) {
     return config.accessToken;
   }
-  return (0, import_config_store.getEnvApiKey)() ?? config.apiKey;
+  return process.env.VIBESKU_API_KEY ?? config.apiKey;
 }
 function requireAuthToken() {
   const token = getAuthToken();
@@ -3470,9 +3474,20 @@ async function request(method, path, body) {
   return { data: envelope.data, rateLimitInfo };
 }
 async function uploadRequest(path, filePath) {
+  const { readFile } = await import("fs/promises");
+  const { basename, extname } = await import("path");
   const baseUrl = getBaseUrl();
   const token = requireAuthToken();
-  const { fileBuffer, fileName, contentType } = await (0, import_file_asset.readUploadAsset)(filePath);
+  const fileBuffer = await readFile(filePath);
+  const fileName = basename(filePath);
+  const ext = extname(filePath).toLowerCase();
+  const mimeMap = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp"
+  };
+  const contentType = mimeMap[ext] ?? "application/octet-stream";
   const formData = new FormData();
   formData.append("file", new Blob([fileBuffer], { type: contentType }), fileName);
   let res = await fetch(`${baseUrl}${path}`, {
@@ -3549,7 +3564,7 @@ var COLORS = {
   dim: "\x1B[2m",
   bold: "\x1B[1m"
 };
-var isColorEnabled = () => !(0, import_config_store.hasNoColor)() && process.stdout.isTTY === true;
+var isColorEnabled = () => process.env.NO_COLOR === void 0 && process.stdout.isTTY === true;
 var c = (color, text) => isColorEnabled() ? `${COLORS[color]}${text}${COLORS.reset}` : text;
 var logger = {
   info: (msg) => console.log(c("blue", "info") + " " + msg),
@@ -3854,9 +3869,9 @@ function formatDate(iso) {
 }
 
 // src/utils/open-browser.ts
-var import_node_child_process = require("child_process");
 var import_node_os2 = require("os");
-function openBrowser(url) {
+async function openBrowser(url) {
+  const { spawn } = await import("child_process");
   const os = (0, import_node_os2.platform)();
   let command;
   let args;
@@ -3866,19 +3881,18 @@ function openBrowser(url) {
       args = [url];
       break;
     case "win32":
-      command = "rundll32";
-      args = ["url.dll,FileProtocolHandler", url];
+      command = "cmd";
+      args = ["/s", "/c", "start", '""', url];
       break;
     default:
       command = "xdg-open";
       args = [url];
       break;
   }
-  const launch = import_node_child_process[["sp", "awn"].join("")];
-  const child = launch(command, args, {
+  const child = spawn(command, args, {
     detached: true,
     stdio: "ignore",
-    windowsHide: true
+    ...os === "win32" ? { windowsVerbatimArguments: true } : {}
   });
   child.on("error", () => {
   });
@@ -4021,7 +4035,7 @@ creditsCommand.command("buy").description("Purchase credits or subscribe to a pl
     }
     if (opts.browser) {
       logger.info("Opening browser to complete payment...");
-      openBrowser(data.checkoutUrl);
+      await openBrowser(data.checkoutUrl);
       logger.plain("");
       logger.dim("  If the browser didn't open, visit:");
       logger.plain(`  ${data.checkoutUrl}`);
@@ -4392,16 +4406,22 @@ var exportCommand = new Command("export").description("Download job outputs").ar
 );
 
 // src/commands/batch.ts
+var import_node_fs3 = require("fs");
 var batchCommand = new Command("batch").description("Run batch generation from a JSON file").argument("<file>", "Path to batch JSON file").option("--json", "Output results as JSON").option("--dry-run", "Validate the file without submitting").action(async (file, opts) => {
+  if (!(0, import_node_fs3.existsSync)(file)) {
+    logger.error(`File not found: ${file}`);
+    process.exit(1);
+  }
   let items;
   try {
-    items = (0, import_batch_file.loadBatchItems)(file);
-  } catch (error) {
-    if (error instanceof Error) {
-      logger.error(error.message);
-    } else {
-      logger.error("Failed to parse batch file as JSON.");
+    const content = (0, import_node_fs3.readFileSync)(file, "utf-8");
+    items = JSON.parse(content);
+    if (!Array.isArray(items)) {
+      logger.error("Batch file must contain a JSON array.");
+      process.exit(1);
     }
+  } catch {
+    logger.error("Failed to parse batch file as JSON.");
     process.exit(1);
   }
   logger.info(`Found ${items.length} items in batch file.`);
@@ -4501,7 +4521,7 @@ authCommand.command("login").description("Sign in via browser-based device autho
   const fullUrl = `${baseUrl}/device?code=${encodeURIComponent(userCode)}`;
   if (shouldOpenBrowser) {
     logger.info(`Opening browser to authorize...`);
-    openBrowser(fullUrl);
+    await openBrowser(fullUrl);
   } else {
     logger.plain(`  Open this URL in your browser:`);
     logger.plain(`  ${fullUrl}`);
@@ -4644,7 +4664,7 @@ authCommand.command("status").description("Show current authentication status").
       logger.plain(`  Expires: ${expires.toLocaleDateString()} (${days} days)`);
     }
   } else if (token.startsWith("vsk_")) {
-    const source = (0, import_config_store.hasEnvApiKey)() ? "env var" : "config file";
+    const source = process.env.VIBESKU_API_KEY ? "env var" : "config file";
     logger.plain(`  Auth:    API Key (${source})`);
   }
   const spinner = new Spinner("Verifying...").start();
