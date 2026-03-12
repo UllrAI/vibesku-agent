@@ -104,6 +104,7 @@ Show detailed template spec: asset requirements, brief fields, options with defa
 vibesku templates info ecom-hero          # Human-readable
 vibesku templates info kv-image-set --json # JSON
 vibesku templates info exploded-view       # Exploded infographic template
+vibesku templates info white-background    # White background packshot template
 ```
 
 Output includes:
@@ -117,6 +118,15 @@ Output includes:
 ---
 
 ## generate
+
+Common template examples:
+
+```bash
+vibesku generate -t ecom-hero -n "Wireless Headphones" -i product.jpg
+vibesku generate -t exploded-view -n "Ceramic Diffuser" -i diffuser.jpg
+vibesku generate -t white-background -n "Water Bottle" -i bottle.jpg
+vibesku generate -t listing -n "Organic Green Tea" -d "Hand-picked tea leaves"
+```
 
 Generate content from a template. Handles asset upload automatically.
 
