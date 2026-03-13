@@ -1,0 +1,54 @@
+name: Validate SKILL description length
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  skill-description-length:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure SKILL.md description <= 1024 chars
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          path = Path('skill/SKILL.md')
+          text = path.read_text(encoding='utf-8')
+
+          # Parse YAML frontmatter block
+          m = re.match(r'^---\n(.*?)\n---\n', text, re.S)
+          if not m:
+            print('ERROR: Missing YAML frontmatter in skill/SKILL.md')
+            sys.exit(1)
+
+          fm = m.group(1)
+
+          # Support both block style (description: |) and single-line style.
+          block = re.search(r'^description:\s*\|\s*\n((?:[ \t].*\n?)*)', fm, re.M)
+          if block:
+            raw = block.group(1)
+            desc = ''.join(line[1:] if line.startswith((' ', '\t')) else line for line in raw.splitlines(True))
+          else:
+            single = re.search(r'^description:\s*(.+)$', fm, re.M)
+            if not single:
+              print('ERROR: description field not found in SKILL frontmatter')
+              sys.exit(1)
+            desc = single.group(1).strip().strip('"\'')
+
+          normalized = ' '.join(desc.split())
+          length = len(normalized)
+          print(f'description length: {length}')
+
+          if length > 1024:
+            print('ERROR: SKILL.md description exceeds 1024 characters')
+            sys.exit(1)
+
+          print('OK: description length is within limit')
+          PY
