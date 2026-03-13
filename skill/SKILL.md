@@ -3,15 +3,28 @@ name: vibesku
 description: |
   CLI for VibeSKU — an AI-powered creative automation platform that turns product SKU photos
   into professional e-commerce visuals and marketplace-ready copy at scale.
-  Use when the user wants to: (1) generate hero banners, exploded-view infographics, detail page poster sets, or listing copy
+  Use when the user wants to: (1) generate hero banners, exploded-view infographics, white-background packshots, detail page poster sets, or listing copy
   from product photos via the command line, (2) authenticate with VibeSKU (browser login or API key),
-  (3) browse or inspect generation templates (ecom-hero, kv-image-set, exploded-view, listing),
+  (3) browse or inspect generation templates (ecom-hero, kv-image-set, exploded-view, white-background, listing),
   (4) refine AI-generated outputs with edit instructions, (5) export/download image and text results,
   (6) run batch generation across a product catalog, (7) manage credits (check balance, purchase, redeem),
   (8) configure CLI settings. Triggers on mentions of "vibesku", "product visuals", "SKU photos",
   "ecommerce images", "hero banner", "listing copy", "product image generation", "batch generation",
   "VisionKV", "exploded view", "product infographic", "component breakdown", "technical diagram",
   or any VibeSKU CLI workflow.
+metadata:
+  openclaw:
+    requires:
+      env:
+        - VIBESKU_API_KEY
+        - VIBESKU_BASE_URL
+        - NO_COLOR
+      bins:
+        - node
+      config:
+        - ~/.vibesku/config.json
+    primaryEnv: VIBESKU_API_KEY
+    homepage: https://www.vibesku.com
 ---
 
 # VibeSKU CLI
@@ -57,13 +70,14 @@ vibesku init vsk_<key>            # API key for CI/CD
 
 ## Template Selection Guide
 
-VibeSKU provides 4 templates. **Read the corresponding reference file before building the generate command.**
+VibeSKU provides 5 templates. **Read the corresponding reference file before building the generate command.**
 
 | Need | Template | Output | Cost | Reference |
 |------|----------|--------|------|-----------|
 | Single product image (main photo, banner, poster) | `ecom-hero` | IMAGE | 1-2 cr/img | [ecom-hero.md](references/ecom-hero.md) |
 | Coordinated detail-page poster set | `kv-image-set` | IMAGE | 1-2 cr/img × scenes | [kv-image-set.md](references/kv-image-set.md) |
 | Single technical exploded infographic | `exploded-view` | IMAGE | 1-2 cr/img | [exploded-view.md](references/exploded-view.md) |
+| Clean white-background packshot | `white-background` | IMAGE | 1-2 cr/img | [white-background.md](references/white-background.md) |
 | Product listing copy (title, bullets, description) | `listing` | TEXT | 1 cr | [listing.md](references/listing.md) |
 
 ### Decision Tree
@@ -74,6 +88,10 @@ User wants visuals?
 │   ├── Balanced callouts (default) → labelPlacement: balanced-callout
 │   ├── Cleaner visual without labels → labelPlacement: none
 │   └── Category-aware environment → backgroundMode: product-matched-scene
+├── Marketplace/catalog white-background packshot → white-background
+│   ├── Pure white background → backgroundTone: pure-white
+│   ├── Softer depth → backgroundTone: soft-white
+│   └── Tighter framing → cropMode: close-up
 ├── Single image (hero/banner/poster) → ecom-hero
 │   ├── Product main photo → scenario: MAIN_IMAGE, aspectRatio: 1:1
 │   ├── Marketing banner  → scenario: BANNER, aspectRatio: 16:9

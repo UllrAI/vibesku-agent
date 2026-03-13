@@ -61,5 +61,5 @@ Reference source:
 After updating, validate with your agent's normal runtime checks:
 
 1. Confirm installed skill metadata shows a newer or expected version.
-2. Confirm template docs include `ecom-hero`, `kv-image-set`, `exploded-view`, and `listing`.
+2. Confirm template docs include `ecom-hero`, `kv-image-set`, `exploded-view`, `white-background`, and `listing`.
 3. Re-run the user task that triggered the version check and verify the mismatch/error is resolved.
