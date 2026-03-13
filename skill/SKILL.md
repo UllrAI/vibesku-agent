@@ -1,17 +1,11 @@
 ---
 name: vibesku
 description: |
-  CLI for VibeSKU — an AI-powered creative automation platform that turns product SKU photos
-  into professional e-commerce visuals and marketplace-ready copy at scale.
-  Use when the user wants to: (1) generate hero banners, exploded-view infographics, white-background packshots, detail page poster sets, or listing copy
-  from product photos via the command line, (2) authenticate with VibeSKU (browser login or API key),
-  (3) browse or inspect generation templates (ecom-hero, kv-image-set, exploded-view, white-background, listing),
-  (4) refine AI-generated outputs with edit instructions, (5) export/download image and text results,
-  (6) run batch generation across a product catalog, (7) manage credits (check balance, purchase, redeem),
-  (8) configure CLI settings. Triggers on mentions of "vibesku", "product visuals", "SKU photos",
-  "ecommerce images", "hero banner", "listing copy", "product image generation", "batch generation",
-  "VisionKV", "exploded view", "product infographic", "component breakdown", "technical diagram",
-  or any VibeSKU CLI workflow.
+  VibeSKU CLI skill for generating e-commerce visuals and listing copy from product photos.
+  Use when users need template-based generation (`ecom-hero`, `kv-image-set`, `exploded-view`,
+  `white-background`, `listing`), refinement, export/download, batch jobs, auth setup, or
+  credits/config management. Triggers on requests mentioning VibeSKU workflows, product image
+  generation, hero banners, exploded views, white-background packshots, listing copy, or batch runs.
 metadata:
   openclaw:
     requires:
