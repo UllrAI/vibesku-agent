@@ -3,9 +3,10 @@ name: vibesku
 description: |
   VibeSKU CLI skill for generating e-commerce visuals and listing copy from product photos.
   Use when users need template-based generation (`ecom-hero`, `kv-image-set`, `exploded-view`,
-  `white-background`, `listing`), refinement, export/download, batch jobs, auth setup, or
+  `image-translation`, `white-background`, `listing`), refinement, export/download, batch jobs, auth setup, or
   credits/config management. Triggers on requests mentioning VibeSKU workflows, product image
-  generation, hero banners, exploded views, white-background packshots, listing copy, or batch runs.
+  generation, hero banners, exploded views, image/poster translation, white-background packshots,
+  listing copy, or batch runs.
 metadata:
   openclaw:
     requires:
@@ -64,13 +65,14 @@ vibesku init vsk_<key>            # API key for CI/CD
 
 ## Template Selection Guide
 
-VibeSKU provides 5 templates. **Read the corresponding reference file before building the generate command.**
+VibeSKU provides 6 templates. **Read the corresponding reference file before building the generate command.**
 
 | Need | Template | Output | Cost | Reference |
 |------|----------|--------|------|-----------|
 | Single product image (main photo, banner, poster) | `ecom-hero` | IMAGE | 1-2 cr/img | [ecom-hero.md](references/ecom-hero.md) |
 | Coordinated detail-page poster set | `kv-image-set` | IMAGE | 1-2 cr/img × scenes | [kv-image-set.md](references/kv-image-set.md) |
 | Single technical exploded infographic | `exploded-view` | IMAGE | 1-2 cr/img | [exploded-view.md](references/exploded-view.md) |
+| Translate text inside an existing image/poster | `image-translation` | IMAGE | 1-2 cr/img | [image-translation.md](references/image-translation.md) |
 | Clean white-background packshot | `white-background` | IMAGE | 1-2 cr/img | [white-background.md](references/white-background.md) |
 | Product listing copy (title, bullets, description) | `listing` | TEXT | 1 cr | [listing.md](references/listing.md) |
 
@@ -82,6 +84,10 @@ User wants visuals?
 │   ├── Balanced callouts (default) → labelPlacement: balanced-callout
 │   ├── Cleaner visual without labels → labelPlacement: none
 │   └── Category-aware environment → backgroundMode: product-matched-scene
+├── Existing image/poster needs visible text translated → image-translation
+│   ├── Keep layout exactly → translationMode: faithful
+│   ├── Make copy more natural → translationMode: polished
+│   └── Preserve logos/trademarks → brandTextMode: preserve
 ├── Marketplace/catalog white-background packshot → white-background
 │   ├── Pure white background → backgroundTone: pure-white
 │   ├── Softer depth → backgroundTone: soft-white
