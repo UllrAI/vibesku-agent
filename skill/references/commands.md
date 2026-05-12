@@ -104,6 +104,7 @@ Show detailed template spec: asset requirements, brief fields, options with defa
 vibesku templates info ecom-hero          # Human-readable
 vibesku templates info kv-image-set --json # JSON
 vibesku templates info exploded-view       # Exploded infographic template
+vibesku templates info image-translation   # Image/poster text translation template
 vibesku templates info white-background    # White background packshot template
 ```
 
@@ -124,6 +125,7 @@ Common template examples:
 ```bash
 vibesku generate -t ecom-hero -n "Wireless Headphones" -i product.jpg
 vibesku generate -t exploded-view -n "Ceramic Diffuser" -i diffuser.jpg
+vibesku generate -t image-translation -i poster.jpg -o '{"targetLang":"zh-Hans"}'
 vibesku generate -t white-background -n "Water Bottle" -i bottle.jpg
 vibesku generate -t listing -n "Organic Green Tea" -d "Hand-picked tea leaves"
 ```
@@ -153,6 +155,11 @@ vibesku generate -t exploded-view \
   -n "Ceramic Aroma Diffuser" \
   -i diffuser.jpg \
   -o '{"style":"premium-technical","layerDensity":"balanced","backgroundMode":"product-matched-scene","labelPlacement":"balanced-callout","aspectRatio":"3:4"}'
+
+# Image/poster translation
+vibesku generate -t image-translation \
+  -i poster.jpg \
+  -o '{"targetLang":"zh-Hans","translationMode":"faithful","brandTextMode":"preserve","aspectRatio":"auto"}'
 
 # Text listing
 vibesku generate -t listing \
