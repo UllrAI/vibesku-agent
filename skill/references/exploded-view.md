@@ -4,7 +4,7 @@
 
 **When to use**: User needs a technical or educational product visual that explains internal structure, ingredients, or component hierarchy in one image.
 
-**Output type**: IMAGE | **Supports analysis**: Yes | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
 
 ## Assets
 

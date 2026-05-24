@@ -110,7 +110,6 @@ vibesku templates info white-background    # White background packshot template
 
 Output includes:
 - Name, description, version, output type
-- Analysis support indicator
 - Asset requirements (min/max for product images and logo)
 - Brief fields (name, type, required)
 - Options (name, type, required, default, enum values with descriptions)

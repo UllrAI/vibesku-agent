@@ -4,7 +4,7 @@
 
 **When to use**: User needs ONE image for a specific placement (storefront hero, ad banner, social post, product main photo).
 
-**Output type**: IMAGE | **Supports analysis**: Yes | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
 
 ## Assets
 

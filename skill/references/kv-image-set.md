@@ -4,7 +4,7 @@
 
 **When to use**: User needs a COMPLETE visual set for a product detail page, campaign, or brand presentation. This is VibeSKU's signature "VisionKV™" capability.
 
-**Output type**: IMAGE | **Supports analysis**: Yes | **Cost**: 1K/2K = 1 credit/scene, 4K = 2 credits/scene
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit/scene, 4K = 2 credits/scene
 
 ## Assets
 
@@ -72,7 +72,7 @@ Style is applied consistently across ALL scenes in the set, ensuring visual cohe
 
 | Style | Visual Feel | Best For |
 |-------|-------------|----------|
-| `auto` | AI picks based on product analysis | Default — recommended for most cases |
+| `auto` | AI picks based on product references during generation | Default — recommended for most cases |
 | `magazine` | Editorial layout, generous whitespace, high-fashion feel | Fashion, beauty, lifestyle brands |
 | `watercolor` | Warm gradients, hand-painted texture | Artisan products, tea, ceramics |
 | `tech-future` | Cool tones, glow effects, data overlays | Electronics, smart devices, SaaS |
