@@ -32,14 +32,14 @@ Controls the overall image composition and layout.
 
 | Scenario | Best For | Default Ratio | Description |
 |----------|----------|---------------|-------------|
-| `MAIN_IMAGE` | Product listings, storefronts | 1:1 | Product centered, clean background, maximum product visibility |
-| `BANNER` | Homepage heroes, ad creatives | 16:9 | Horizontal layout with space for marketing text |
-| `POSTER` | Social media, detail pages | 3:4 | Vertical format, prominent product with text overlay |
+| `MAIN_IMAGE` | Product listings, storefronts | 1:1 | Product-first hero image, clean commercial lighting, maximum product visibility, text-light by default |
+| `BANNER` | Homepage heroes, ad creatives | 16:9 | Horizontal campaign banner with product-led scene setting, readable copy zone, and benefit-led headline |
+| `POSTER` | Social media, detail pages | 3:4 | Editorial campaign poster with expressive typography, product hero treatment, and concise marketing copy |
 
 **When to use which scenario**:
-- **MAIN_IMAGE**: Default choice. Product is the focus, no marketing text needed. E-commerce main photo, catalog image.
-- **BANNER**: Need horizontal layout WITH text. Homepage hero, email header, Facebook ad, LinkedIn banner.
-- **POSTER**: Need vertical layout WITH text. Instagram post, detail page top image, in-store display.
+- **MAIN_IMAGE**: Default choice. Product is the focus, no marketing text needed. Use for e-commerce main photos and catalog-style hero images.
+- **BANNER**: Need horizontal layout WITH text. Use for homepage heroes, email headers, Facebook ads, or LinkedIn banners.
+- **POSTER**: Need campaign-style layout WITH text. Use for Instagram posts/stories, detail page top images, or in-store display visuals.
 
 ## Style Options
 
@@ -73,8 +73,9 @@ Controls how overlaid text is positioned relative to the product.
 ## Copy & Evidence Guidance
 
 - The image model directly inspects uploaded product photos, packaging, logo, visible labels, materials, colors, and the written brief during generation. No separate analysis step is required.
+- Preserve product identity exactly, but adapt lighting, background, props, graphic system, and copy to the selected scenario. The output should not merely copy the raw source-photo look unchanged.
 - Do not make banners or posters a plain packshot plus repeated product details. Use the strongest supported buyer angle as the headline.
-- `MAIN_IMAGE` should stay product-first and text-light. `BANNER` and `POSTER` can use a clear benefit-led headline and short supporting copy.
+- `MAIN_IMAGE` should stay product-first and text-light. `BANNER` should feel like a horizontal campaign banner. `POSTER` should feel like an editorial campaign visual with stronger typography.
 - Hard factual claims require explicit support from the brief or readable/visible evidence. Never invent specs, certifications, awards, origin stories, ratings, compatibility, or regulated claims.
 
 ## Examples
