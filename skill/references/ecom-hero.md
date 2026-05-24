@@ -47,7 +47,7 @@ Controls the visual aesthetic, lighting, and mood of the generated image.
 
 | Style | Visual Feel | Best For |
 |-------|-------------|----------|
-| `auto` | AI analyzes product and picks best style | When unsure — let AI decide |
+| `auto` | AI directly inspects product cues and picks best style | When unsure — let AI decide |
 | `studio` | Clean background, professional lighting | Electronics, watches, jewelry |
 | `lifestyle` | Real-world context, warm tones | Food, home goods, apparel |
 | `premium` | Dark theme, metallic accents, generous whitespace | Luxury items, high-end tech |
@@ -69,6 +69,13 @@ Controls how overlaid text is positioned relative to the product.
 | `stacked` | Text above or below product | Tall/vertical products |
 | `side-by-side` | Text left or right of product | Wide/horizontal products |
 | `diagonal` | Text along a diagonal axis | Dynamic, energetic compositions |
+
+## Copy & Evidence Guidance
+
+- The image model directly inspects uploaded product photos, packaging, logo, visible labels, materials, colors, and the written brief during generation. No separate analysis step is required.
+- Do not make banners or posters a plain packshot plus repeated product details. Use the strongest supported buyer angle as the headline.
+- `MAIN_IMAGE` should stay product-first and text-light. `BANNER` and `POSTER` can use a clear benefit-led headline and short supporting copy.
+- Hard factual claims require explicit support from the brief or readable/visible evidence. Never invent specs, certifications, awards, origin stories, ratings, compatibility, or regulated claims.
 
 ## Examples
 
@@ -111,7 +118,7 @@ vibesku generate -t ecom-hero \
 
 ## Tips
 
-- When user doesn't specify style, omit it — `auto` lets AI analyze the product and pick the best match
+- When user doesn't specify style, omit it — `auto` lets AI directly inspect the product and pick the best match
 - For social media: `BANNER` + `16:9` (Facebook/LinkedIn), `POSTER` + `9:16` (Instagram Stories/TikTok), `MAIN_IMAGE` + `1:1` (Instagram feed)
 - `imageSize: 4K` doubles the credit cost — only use when user explicitly needs high resolution or print-quality
 - Multiple product images (via `-i`) help AI understand the product from different angles — the more angles, the more faithful the reproduction

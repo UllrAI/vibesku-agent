@@ -45,6 +45,13 @@
 | `balanced` | Product fills more of the canvas with clean margins | Standard catalog use |
 | `close-up` | Tighter framing while preserving key details | Secondary listing images or tighter thumbnail crops |
 
+## Copy & Evidence Guidance
+
+- This template uses uploaded references only to restore the product accurately for catalog presentation.
+- Do not infer scenes, copy angles, badges, benefits, props, people, hands, extra accessories, or extra package contents.
+- Treat the written brief as identity context only; do not turn it into text overlays or promotional graphics.
+- If multiple reference images show different angles, choose the clearest catalog-safe angle or synthesize a faithful main-image view without adding new objects.
+
 ## Recommended Defaults by Goal
 
 | Goal | Suggested Options |
@@ -84,7 +91,7 @@ vibesku generate -t white-background \
 ## Tips
 
 - Use this template when the user explicitly wants white-background listing images rather than styled hero visuals.
-- It does **not** run an analysis step, so generation starts immediately after upload.
+- It does **not** run a separate analysis step, so generation starts immediately after upload.
 - `pure-white` is the safest default for marketplace compliance.
 - `soft-white` helps avoid a sterile look while keeping the image catalog-ready.
 - Provide multiple product angles in `-i` when reflections, labels, or packaging details must stay precise.

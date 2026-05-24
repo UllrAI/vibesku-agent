@@ -71,6 +71,14 @@ The quality of generated copy depends heavily on what you provide:
 - Target audience / use cases
 - Certifications or awards
 
+## Copy & Evidence Guidance
+
+- The text model can inspect optional product and logo images during generation. No separate analysis step is required.
+- Use visible color, texture, form factor, packaging text, included accessories, logo cues, and the written brief to infer buyer-facing benefits and use cases.
+- Do not merely restate `productName` and `productDetails`. Convert supported features into benefits, objections answered, and marketplace-appropriate selling angles.
+- Hard factual claims require explicit support from the brief or readable/visible evidence. Never invent specs, certifications, ingredients, awards, origin stories, ratings, compatibility, or regulated claims.
+- If images conflict with the written brief, use cautious wording or omit the conflicting detail.
+
 ## Examples
 
 ```bash
@@ -118,7 +126,7 @@ vibesku generate -t listing \
 
 - **`-d` is the most important input** — the richer the product details, the better the generated copy. Include specs, materials, unique features, and target audience.
 - **Product images are optional but valuable** — when provided (`-i`), AI can describe visual details (color, texture, design) that you might forget to mention in `-d`.
-- **This template does NOT support image generation analysis**. It relies on your text brief and optional uploaded references for copy context.
+- **No separate analysis step**: generation directly uses your text brief and optional uploaded references for copy context.
 - **Cost is fixed at 1 credit** per generation regardless of output length.
 - **Language affects writing style**, not just translation — `AMAZON_LISTING` + `English` produces Amazon US-style copy, while `TAOBAO_DETAIL` + `Chinese` produces native Chinese commerce writing.
 - **Multi-language strategy**: Generate separate listings for each marketplace rather than translating one. Each template name is optimized for its platform's buyer expectations.

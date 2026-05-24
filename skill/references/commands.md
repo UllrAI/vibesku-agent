@@ -105,6 +105,7 @@ vibesku templates info ecom-hero          # Human-readable
 vibesku templates info kv-image-set --json # JSON
 vibesku templates info exploded-view       # Exploded infographic template
 vibesku templates info image-translation   # Image/poster text translation template
+vibesku templates info lifestyle-scene      # Realistic product usage scene template
 vibesku templates info white-background    # White background packshot template
 ```
 
@@ -125,6 +126,7 @@ Common template examples:
 vibesku generate -t ecom-hero -n "Wireless Headphones" -i product.jpg
 vibesku generate -t exploded-view -n "Ceramic Diffuser" -i diffuser.jpg
 vibesku generate -t image-translation -i poster.jpg -o '{"targetLang":"zh-Hans"}'
+vibesku generate -t lifestyle-scene -n "Travel Mug" -i mug.jpg
 vibesku generate -t white-background -n "Water Bottle" -i bottle.jpg
 vibesku generate -t listing -n "Organic Green Tea" -d "Hand-picked tea leaves"
 ```
@@ -159,6 +161,12 @@ vibesku generate -t exploded-view \
 vibesku generate -t image-translation \
   -i poster.jpg \
   -o '{"targetLang":"zh-Hans","translationMode":"faithful","brandTextMode":"preserve","aspectRatio":"auto"}'
+
+# Lifestyle scene
+vibesku generate -t lifestyle-scene \
+  -n "Insulated Travel Mug" \
+  -i mug.jpg \
+  -o '{"scenePreset":"auto","personMode":"hand-only","style":"lifestyle"}'
 
 # Text listing
 vibesku generate -t listing \

@@ -59,6 +59,14 @@ Note: `scene` is accepted as a backward-compatible alias and normalized to `prod
 | `balanced-callout` | Split callouts across left and right (default) |
 | `none` | No callout labels or leader lines |
 
+## Copy & Evidence Guidance
+
+- The image model directly inspects product photos, packaging, labels, materials, ingredients, visible construction, and the written brief during generation. No separate analysis step is required.
+- Labels should explain supported structure, material, ingredient, functional zone, or use-flow. Avoid labels that only repeat the product name.
+- If internals are not visible or specified, use a conceptual exploded arrangement from externally visible parts and supported materials; do not invent hidden engineering.
+- For food, beauty, home, or material-driven products, layers can represent ingredients, material strata, texture, packaging, or usage sequence instead of mechanical parts.
+- Hard factual claims require explicit support from the brief or readable/visible evidence. Never invent exact specs, certifications, tests, awards, or regulated claims.
+
 ## Recommended Defaults by Goal
 
 | Goal | Suggested Options |

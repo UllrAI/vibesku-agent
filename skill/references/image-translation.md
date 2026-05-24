@@ -38,6 +38,13 @@ Use `-i` for the source image. Do not pass a separate logo unless the API templa
 | `preserve` | Keep brand names, logo artwork, trademarks, model numbers, SKU codes, barcodes, QR codes, certifications, and legal marks unchanged | Default and safest choice |
 | `translate` | Translate normal readable brand-side marketing copy while preserving logos/trademarks and machine-readable codes | Posters where brand-side slogans also need localization |
 
+## Copy & Evidence Guidance
+
+- This template translates an existing image/poster; it is not for creating new marketing copy from product photos.
+- `polished` mode may improve fluency and local idiom, but it must preserve the source meaning, claim strength, hierarchy, numbers, and factual scope.
+- Do not infer new selling points, fill unreadable text with product descriptions, add badges, or rewrite the poster into a new campaign.
+- Keep protected brand text, model numbers, SKU codes, barcodes, QR codes, certification marks, legal symbols, and trademarks according to `brandTextMode`.
+
 ## Examples
 
 ```bash
