@@ -3742,7 +3742,6 @@ function printTemplateInfo(t) {
   logger.plain(`  Description:  ${t.description}`);
   logger.plain(`  Version:      ${t.version}`);
   logger.plain(`  Output Type:  ${t.outputType}`);
-  logger.plain(`  Analysis:     ${t.supportsAnalysis ? "yes" : "no"}`);
   logger.plain("");
   logger.plain("  Asset Requirements:");
   logger.plain(
@@ -4194,8 +4193,7 @@ var statusCommand = new Command("status").description("Check job status and deta
         ["Job ID", dto.job.id],
         ["Template", dto.job.templateId],
         ["Brief Updated", formatDate(dto.job.briefUpdatedAt)],
-        ["Assets Updated", formatDate(dto.job.assetsUpdatedAt)],
-        ["Analysis", dto.job.analysisUpdatedAt ? formatDate(dto.job.analysisUpdatedAt) : "pending"]
+        ["Assets Updated", formatDate(dto.job.assetsUpdatedAt)]
       ])
     );
     if (dto.activeRuns.length > 0) {
