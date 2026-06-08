@@ -73,6 +73,9 @@ Each scene generates ONE poster. Order in the array determines output order.
 **Copy guidance**:
 - Each scene has a distinct storytelling role. Do not make every poster a product packshot plus repeated product details.
 - Infer headlines, benefits, use contexts, and callouts from the uploaded product image(s), visible packaging text, logo, and brief.
+- Treat multiple product images as an identity/evidence pool. They help preserve product accuracy across angles and details, but the output should be a newly art-directed poster, not a copied source photo, raw collage, or unchanged product image with text overlaid.
+- Preserve SKU identity, not the exact reference pose. Across scenes, vary product angle, crop, subject scale, environment, lighting, and layout while keeping visible product facts accurate.
+- Use scene-specific staging: hero = full-product anchor; lifestyle = wider context; detail scenes = macro/partial crops; specs = product plus table/grid; usage guide = steps or handling diagrams.
 - Specs, quality proof, close-up detail, and usage-guide scenes are evidence-first. Treat them as technical storytelling and avoid soft marketing claims when exact evidence is required.
 - Do not invent exact numbers, certifications, customer names, ratings, awards, ingredients, medical/safety claims, origin stories, or compatibility claims.
 - If a scene asks for specs, reviews, quality proof, brand story, or usage guidance but evidence is thin, use softer benefit-oriented copy instead of hard facts.
