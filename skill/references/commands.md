@@ -103,6 +103,7 @@ Show detailed template spec: asset requirements, brief fields, options with defa
 ```bash
 vibesku templates info ecom-hero          # Human-readable
 vibesku templates info kv-image-set --json # JSON
+vibesku templates info scenario-set        # Platform image set (Amazon/Taobao/Shopify/RED) template
 vibesku templates info exploded-view       # Exploded infographic template
 vibesku templates info image-translation   # Image/poster text translation template
 vibesku templates info lifestyle-scene      # Realistic product usage scene template
