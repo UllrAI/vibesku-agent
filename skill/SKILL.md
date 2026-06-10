@@ -2,11 +2,12 @@
 name: vibesku
 description: |
   VibeSKU CLI skill for generating e-commerce visuals and listing copy from product photos.
-  Use when users need template-based generation (`ecom-hero`, `kv-image-set`, `exploded-view`,
-  `image-translation`, `lifestyle-scene`, `white-background`, `listing`), refinement, export/download, batch jobs, auth setup, or
-  credits/config management. Triggers on requests mentioning VibeSKU workflows, product image
-  generation, hero banners, exploded views, image/poster translation, white-background packshots,
-  listing copy, or batch runs.
+  Use when users need template-based generation (`scenario-set`, `ecom-hero`, `kv-image-set`,
+  `exploded-view`, `image-translation`, `lifestyle-scene`, `white-background`, `listing`),
+  refinement, export/download, batch jobs, auth setup, or credits/config management. Triggers on
+  requests mentioning VibeSKU workflows, product image generation, platform image sets
+  (Amazon/Taobao/Shopify/RED), hero banners, exploded views, image/poster translation,
+  white-background packshots, listing copy, or batch runs.
 metadata:
   openclaw:
     requires:
@@ -65,10 +66,11 @@ vibesku init vsk_<key>            # API key for CI/CD
 
 ## Template Selection Guide
 
-VibeSKU provides 7 templates. **Read the corresponding reference file before building the generate command.**
+VibeSKU provides 8 templates. **Read the corresponding reference file before building the generate command.**
 
 | Need | Template | Output | Cost | Reference |
 |------|----------|--------|------|-----------|
+| Complete platform image set in one pass (Amazon / Taobao / Shopify / RED / custom) | `scenario-set` | IMAGE | 1-2 cr/img × slots | [scenario-set.md](references/scenario-set.md) |
 | Single product image (main photo, banner, poster) | `ecom-hero` | IMAGE | 1-2 cr/img | [ecom-hero.md](references/ecom-hero.md) |
 | Coordinated detail-page poster set | `kv-image-set` | IMAGE | 1-2 cr/img × scenes | [kv-image-set.md](references/kv-image-set.md) |
 | Single technical exploded infographic | `exploded-view` | IMAGE | 1-2 cr/img | [exploded-view.md](references/exploded-view.md) |
@@ -81,6 +83,12 @@ VibeSKU provides 7 templates. **Read the corresponding reference file before bui
 
 ```
 User wants visuals?
+├── Whole listing / platform image set in one pass → scenario-set
+│   ├── Amazon listing pack      → scenarioId: amazon-pack
+│   ├── Taobao/Tmall 主图+详情页 → scenarioId: taobao-pack
+│   ├── Shopify storefront pack  → scenarioId: shopify-pack
+│   ├── RED/Xiaohongshu post set → scenarioId: red-pack
+│   └── Hand-picked image types  → scenarioId: custom-pack
 ├── Technical exploded infographic → exploded-view
 │   ├── Balanced callouts (default) → labelPlacement: balanced-callout
 │   ├── Cleaner visual without labels → labelPlacement: none
