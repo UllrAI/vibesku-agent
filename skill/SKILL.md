@@ -3,10 +3,10 @@ name: vibesku
 description: |
   VibeSKU CLI skill for generating e-commerce visuals and listing copy from product photos.
   Use when users need template-based generation (`ecom-hero`, `kv-image-set`, `exploded-view`,
-  `image-translation`, `lifestyle-scene`, `white-background`, `listing`), refinement, export/download, batch jobs, auth setup, or
-  credits/config management. Triggers on requests mentioning VibeSKU workflows, product image
-  generation, hero banners, exploded views, image/poster translation, white-background packshots,
-  listing copy, or batch runs.
+  `image-translation`, `lifestyle-scene`, `white-background`, `listing`, `ugc-video`), refinement, export/download,
+  batch jobs, auth setup, or credits/config management. Triggers on requests mentioning VibeSKU workflows,
+  product image generation, hero banners, exploded views, image/poster translation, white-background packshots,
+  listing copy, UGC shopping videos, or batch runs.
 metadata:
   openclaw:
     requires:
@@ -65,7 +65,7 @@ vibesku init vsk_<key>            # API key for CI/CD
 
 ## Template Selection Guide
 
-VibeSKU provides 7 templates. **Read the corresponding reference file before building the generate command.**
+VibeSKU provides 8 templates. **Read the corresponding reference file before building the generate command.**
 
 | Need | Template | Output | Cost | Reference |
 |------|----------|--------|------|-----------|
@@ -76,6 +76,7 @@ VibeSKU provides 7 templates. **Read the corresponding reference file before bui
 | Product in a realistic usage scene | `lifestyle-scene` | IMAGE | 1-2 cr/img | [lifestyle-scene.md](references/lifestyle-scene.md) |
 | Clean white-background packshot | `white-background` | IMAGE | 1-2 cr/img | [white-background.md](references/white-background.md) |
 | Product listing copy (title, bullets, description) | `listing` | TEXT | 1 cr | [listing.md](references/listing.md) |
+| Short vertical UGC shopping video with spoken script | `ugc-video` | VIDEO | **3-5 cr/second** | [ugc-video.md](references/ugc-video.md) |
 
 ### Decision Tree
 
@@ -105,6 +106,14 @@ User wants visuals?
     ├── Full detail page     → scenes: [kv-hero, lifestyle, detail-01, specs-table, ...]
     ├── Quick hero + lifestyle → scenes: [kv-hero, lifestyle]
     └── Brand storytelling   → scenes: [kv-hero, brand-story, user-review]
+
+User wants a video?
+└── Short vertical UGC shopping clip → ugc-video
+    ├── ⚠️ Billed per second: 480p = 3 cr/s, 720p = 5 cr/s. Quote the total first.
+    ├── Packaging reveal      → videoAngle: unboxing
+    ├── Worn or used on camera → videoAngle: try-on
+    ├── Feature walkthrough   → videoAngle: demo
+    └── Pain point then fix   → videoAngle: problem-solution
 
 User wants text?
 └── Product listing copy → listing
@@ -166,7 +175,8 @@ All commands support `--json` for machine-readable output. Full details: [comman
 ## Key Behaviors
 
 - **Asset upload**: `-i` auto-uploads product images; `-l` uploads logo
-- **Modify vs Regenerate**: Use `vibesku refine <output-id> -p "<instruction>"` to edit existing output. Use `vibesku generate` only for new creations.
+- **Modify vs Regenerate**: Use `vibesku refine <output-id> -p "<instruction>"` to edit existing output. Use `vibesku generate` only for new creations. **VIDEO outputs cannot be refined** — regenerate with different options instead.
+- **Per-second video billing**: `ugc-video` costs `durationSeconds × 3` (480p) or `× 5` (720p) credits — up to 75 for one clip. Confirm duration and resolution and state the total before generating.
 - **Full UUID required for refine**: Use `vibesku status <job-id> --json` to get complete output UUIDs (table view truncates them).
 - **Agent-friendly output**: Prefer `--json` flag for all commands when used by AI agents.
 - **Version drift check (recommended triggers)**: Compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days (recommended cadence). If issues occur during execution, prioritize this check before retrying generation/refine commands. Follow [versioning.md](references/versioning.md).
