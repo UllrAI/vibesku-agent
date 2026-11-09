@@ -29,7 +29,7 @@ vibesku auth login                # Open browser and sign in
 vibesku auth login --no-browser   # Print URL instead of opening browser
 ```
 
-Tokens stored at `~/.vibesku/config.json` (mode 0600), last 90 days with automatic refresh. Non-interactive environments imply `--no-browser`.
+Tokens stored at `~/.vibesku/config.json` (mode 0600), last 90 days with automatic refresh. Non-interactive environments imply `--no-browser`. The command stops waiting when the device code expires. Start a fresh login to request another code.
 
 ### auth logout
 
@@ -214,6 +214,8 @@ On success, displays run ID, job ID, and remaining credits.
 ---
 
 ## status
+
+On current VibeSKU servers, `--json` includes `latestRun` with the last generation or refinement status and its failure reason, if available. `--watch` stops with exit code 1 when the latest run fails and no active runs remain.
 
 Check job status, active runs, and detailed output list.
 

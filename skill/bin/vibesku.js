@@ -7,7 +7,11 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -26,9 +30,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/error.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/error.js
 var require_error = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/error.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/error.js"(exports2) {
     "use strict";
     var CommanderError2 = class extends Error {
       /**
@@ -62,9 +66,9 @@ var require_error = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/argument.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/argument.js
 var require_argument = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/argument.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/argument.js"(exports2) {
     "use strict";
     var { InvalidArgumentError: InvalidArgumentError2 } = require_error();
     var Argument2 = class {
@@ -97,7 +101,7 @@ var require_argument = __commonJS({
             this._name = name;
             break;
         }
-        if (this._name.length > 3 && this._name.slice(-3) === "...") {
+        if (this._name.endsWith("...")) {
           this.variadic = true;
           this._name = this._name.slice(0, -3);
         }
@@ -113,11 +117,12 @@ var require_argument = __commonJS({
       /**
        * @package
        */
-      _concatValue(value, previous) {
+      _collectValue(value, previous) {
         if (previous === this.defaultValue || !Array.isArray(previous)) {
           return [value];
         }
-        return previous.concat(value);
+        previous.push(value);
+        return previous;
       }
       /**
        * Set the default value, and optionally supply the description to be displayed in the help.
@@ -156,7 +161,7 @@ var require_argument = __commonJS({
             );
           }
           if (this.variadic) {
-            return this._concatValue(arg, previous);
+            return this._collectValue(arg, previous);
           }
           return arg;
         };
@@ -190,9 +195,9 @@ var require_argument = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/help.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/help.js
 var require_help = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/help.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/help.js"(exports2) {
     "use strict";
     var { humanReadableArgName } = require_argument();
     var Help2 = class {
@@ -470,7 +475,11 @@ var require_help = __commonJS({
           extraInfo.push(`env: ${option.envVar}`);
         }
         if (extraInfo.length > 0) {
-          return `${option.description} (${extraInfo.join(", ")})`;
+          const extraDescription = `(${extraInfo.join(", ")})`;
+          if (option.description) {
+            return `${option.description} ${extraDescription}`;
+          }
+          return extraDescription;
         }
         return option.description;
       }
@@ -501,6 +510,41 @@ var require_help = __commonJS({
           return extraDescription;
         }
         return argument.description;
+      }
+      /**
+       * Format a list of items, given a heading and an array of formatted items.
+       *
+       * @param {string} heading
+       * @param {string[]} items
+       * @param {Help} helper
+       * @returns string[]
+       */
+      formatItemList(heading, items, helper) {
+        if (items.length === 0) return [];
+        return [helper.styleTitle(heading), ...items, ""];
+      }
+      /**
+       * Group items by their help group heading.
+       *
+       * @param {Command[] | Option[]} unsortedItems
+       * @param {Command[] | Option[]} visibleItems
+       * @param {Function} getGroup
+       * @returns {Map<string, Command[] | Option[]>}
+       */
+      groupItems(unsortedItems, visibleItems, getGroup) {
+        const result = /* @__PURE__ */ new Map();
+        unsortedItems.forEach((item) => {
+          const group = getGroup(item);
+          if (!result.has(group)) result.set(group, []);
+        });
+        visibleItems.forEach((item) => {
+          const group = getGroup(item);
+          if (!result.has(group)) {
+            result.set(group, []);
+          }
+          result.get(group).push(item);
+        });
+        return result;
       }
       /**
        * Generate the built-in help text.
@@ -535,26 +579,23 @@ var require_help = __commonJS({
             helper.styleArgumentDescription(helper.argumentDescription(argument))
           );
         });
-        if (argumentList.length > 0) {
-          output = output.concat([
-            helper.styleTitle("Arguments:"),
-            ...argumentList,
-            ""
-          ]);
-        }
-        const optionList = helper.visibleOptions(cmd).map((option) => {
-          return callFormatItem(
-            helper.styleOptionTerm(helper.optionTerm(option)),
-            helper.styleOptionDescription(helper.optionDescription(option))
-          );
+        output = output.concat(
+          this.formatItemList("Arguments:", argumentList, helper)
+        );
+        const optionGroups = this.groupItems(
+          cmd.options,
+          helper.visibleOptions(cmd),
+          (option) => option.helpGroupHeading ?? "Options:"
+        );
+        optionGroups.forEach((options, group) => {
+          const optionList = options.map((option) => {
+            return callFormatItem(
+              helper.styleOptionTerm(helper.optionTerm(option)),
+              helper.styleOptionDescription(helper.optionDescription(option))
+            );
+          });
+          output = output.concat(this.formatItemList(group, optionList, helper));
         });
-        if (optionList.length > 0) {
-          output = output.concat([
-            helper.styleTitle("Options:"),
-            ...optionList,
-            ""
-          ]);
-        }
         if (helper.showGlobalOptions) {
           const globalOptionList = helper.visibleGlobalOptions(cmd).map((option) => {
             return callFormatItem(
@@ -562,27 +603,24 @@ var require_help = __commonJS({
               helper.styleOptionDescription(helper.optionDescription(option))
             );
           });
-          if (globalOptionList.length > 0) {
-            output = output.concat([
-              helper.styleTitle("Global Options:"),
-              ...globalOptionList,
-              ""
-            ]);
-          }
-        }
-        const commandList = helper.visibleCommands(cmd).map((cmd2) => {
-          return callFormatItem(
-            helper.styleSubcommandTerm(helper.subcommandTerm(cmd2)),
-            helper.styleSubcommandDescription(helper.subcommandDescription(cmd2))
+          output = output.concat(
+            this.formatItemList("Global Options:", globalOptionList, helper)
           );
-        });
-        if (commandList.length > 0) {
-          output = output.concat([
-            helper.styleTitle("Commands:"),
-            ...commandList,
-            ""
-          ]);
         }
+        const commandGroups = this.groupItems(
+          cmd.commands,
+          helper.visibleCommands(cmd),
+          (sub) => sub.helpGroup() || "Commands:"
+        );
+        commandGroups.forEach((commands, group) => {
+          const commandList = commands.map((sub) => {
+            return callFormatItem(
+              helper.styleSubcommandTerm(helper.subcommandTerm(sub)),
+              helper.styleSubcommandDescription(helper.subcommandDescription(sub))
+            );
+          });
+          output = output.concat(this.formatItemList(group, commandList, helper));
+        });
         return output.join("\n");
       }
       /**
@@ -760,9 +798,9 @@ ${itemIndentStr}`);
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/option.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/option.js
 var require_option = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/option.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/option.js"(exports2) {
     "use strict";
     var { InvalidArgumentError: InvalidArgumentError2 } = require_error();
     var Option2 = class {
@@ -795,6 +833,7 @@ var require_option = __commonJS({
         this.argChoices = void 0;
         this.conflictsWith = [];
         this.implied = void 0;
+        this.helpGroupHeading = void 0;
       }
       /**
        * Set the default value, and optionally supply the description to be displayed in the help.
@@ -905,11 +944,12 @@ var require_option = __commonJS({
       /**
        * @package
        */
-      _concatValue(value, previous) {
+      _collectValue(value, previous) {
         if (previous === this.defaultValue || !Array.isArray(previous)) {
           return [value];
         }
-        return previous.concat(value);
+        previous.push(value);
+        return previous;
       }
       /**
        * Only allow option value to be one of choices.
@@ -926,7 +966,7 @@ var require_option = __commonJS({
             );
           }
           if (this.variadic) {
-            return this._concatValue(arg, previous);
+            return this._collectValue(arg, previous);
           }
           return arg;
         };
@@ -954,6 +994,16 @@ var require_option = __commonJS({
           return camelcase(this.name().replace(/^no-/, ""));
         }
         return camelcase(this.name());
+      }
+      /**
+       * Set the help group heading.
+       *
+       * @param {string} heading
+       * @return {Option}
+       */
+      helpGroup(heading) {
+        this.helpGroupHeading = heading;
+        return this;
       }
       /**
        * Check if `arg` matches the short or long flag.
@@ -1062,9 +1112,9 @@ var require_option = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/suggestSimilar.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/suggestSimilar.js
 var require_suggestSimilar = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/suggestSimilar.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/suggestSimilar.js"(exports2) {
     "use strict";
     var maxDistance = 3;
     function editDistance(a, b) {
@@ -1143,9 +1193,9 @@ var require_suggestSimilar = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/command.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/command.js
 var require_command = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/lib/command.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/lib/command.js"(exports2) {
     "use strict";
     var EventEmitter = require("events").EventEmitter;
     var childProcess = require("child_process");
@@ -1212,6 +1262,9 @@ var require_command = __commonJS({
         this._addImplicitHelpCommand = void 0;
         this._helpCommand = void 0;
         this._helpConfiguration = {};
+        this._helpGroupHeading = void 0;
+        this._defaultCommandGroup = void 0;
+        this._defaultOptionGroup = void 0;
       }
       /**
        * Copy settings that are useful to have in common across root command and subcommands.
@@ -1351,7 +1404,10 @@ var require_command = __commonJS({
        */
       configureOutput(configuration) {
         if (configuration === void 0) return this._outputConfiguration;
-        Object.assign(this._outputConfiguration, configuration);
+        this._outputConfiguration = {
+          ...this._outputConfiguration,
+          ...configuration
+        };
         return this;
       }
       /**
@@ -1422,16 +1478,16 @@ var require_command = __commonJS({
        *
        * @param {string} name
        * @param {string} [description]
-       * @param {(Function|*)} [fn] - custom argument processing function
+       * @param {(Function|*)} [parseArg] - custom argument processing function or default value
        * @param {*} [defaultValue]
        * @return {Command} `this` command for chaining
        */
-      argument(name, description, fn, defaultValue) {
+      argument(name, description, parseArg, defaultValue) {
         const argument = this.createArgument(name, description);
-        if (typeof fn === "function") {
-          argument.default(defaultValue).argParser(fn);
+        if (typeof parseArg === "function") {
+          argument.default(defaultValue).argParser(parseArg);
         } else {
-          argument.default(fn);
+          argument.default(parseArg);
         }
         this.addArgument(argument);
         return this;
@@ -1461,7 +1517,7 @@ var require_command = __commonJS({
        */
       addArgument(argument) {
         const previousArgument = this.registeredArguments.slice(-1)[0];
-        if (previousArgument && previousArgument.variadic) {
+        if (previousArgument?.variadic) {
           throw new Error(
             `only the last argument can be variadic '${previousArgument.name()}'`
           );
@@ -1490,10 +1546,13 @@ var require_command = __commonJS({
       helpCommand(enableOrNameAndArgs, description) {
         if (typeof enableOrNameAndArgs === "boolean") {
           this._addImplicitHelpCommand = enableOrNameAndArgs;
+          if (enableOrNameAndArgs && this._defaultCommandGroup) {
+            this._initCommandGroup(this._getHelpCommand());
+          }
           return this;
         }
-        enableOrNameAndArgs = enableOrNameAndArgs ?? "help [command]";
-        const [, helpName, helpArgs] = enableOrNameAndArgs.match(/([^ ]+) *(.*)/);
+        const nameAndArgs = enableOrNameAndArgs ?? "help [command]";
+        const [, helpName, helpArgs] = nameAndArgs.match(/([^ ]+) *(.*)/);
         const helpDescription = description ?? "display help for command";
         const helpCommand = this.createCommand(helpName);
         helpCommand.helpOption(false);
@@ -1501,6 +1560,7 @@ var require_command = __commonJS({
         if (helpDescription) helpCommand.description(helpDescription);
         this._addImplicitHelpCommand = true;
         this._helpCommand = helpCommand;
+        if (enableOrNameAndArgs || description) this._initCommandGroup(helpCommand);
         return this;
       }
       /**
@@ -1517,6 +1577,7 @@ var require_command = __commonJS({
         }
         this._addImplicitHelpCommand = true;
         this._helpCommand = helpCommand;
+        this._initCommandGroup(helpCommand);
         return this;
       }
       /**
@@ -1665,6 +1726,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           throw new Error(`Cannot add option '${option.flags}'${this._name && ` to command '${this._name}'`} due to conflicting flag '${matchingFlag}'
 -  already used by option '${matchingOption.flags}'`);
         }
+        this._initOptionGroup(option);
         this.options.push(option);
       }
       /**
@@ -1688,6 +1750,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
             `cannot add command '${newCmd}' as already have command '${existingCmd}'`
           );
         }
+        this._initCommandGroup(command);
         this.commands.push(command);
       }
       /**
@@ -1720,7 +1783,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           if (val !== null && option.parseArg) {
             val = this._callParseArg(option, val, oldValue, invalidValueMessage);
           } else if (val !== null && option.variadic) {
-            val = option._concatValue(val, oldValue);
+            val = option._collectValue(val, oldValue);
           }
           if (val == null) {
             if (option.negate) {
@@ -2372,7 +2435,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        * @private
        */
       _chainOrCall(promise, fn) {
-        if (promise && promise.then && typeof promise.then === "function") {
+        if (promise?.then && typeof promise.then === "function") {
           return promise.then(() => fn());
         }
         return fn();
@@ -2477,7 +2540,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
           promiseChain = this._chainOrCallHooks(promiseChain, "postAction");
           return promiseChain;
         }
-        if (this.parent && this.parent.listenerCount(commandEvent)) {
+        if (this.parent?.listenerCount(commandEvent)) {
           checkForUnknownOptions();
           this._processArguments();
           this.parent.emit(commandEvent, operands, unknown);
@@ -2588,26 +2651,34 @@ Expecting one of '${allowedValues.join("', '")}'`);
        *     sub --unknown uuu op => [sub], [--unknown uuu op]
        *     sub -- --unknown uuu op => [sub --unknown uuu op], []
        *
-       * @param {string[]} argv
+       * @param {string[]} args
        * @return {{operands: string[], unknown: string[]}}
        */
-      parseOptions(argv) {
+      parseOptions(args) {
         const operands = [];
         const unknown = [];
         let dest = operands;
-        const args = argv.slice();
         function maybeOption(arg) {
           return arg.length > 1 && arg[0] === "-";
         }
+        const negativeNumberArg = (arg) => {
+          if (!/^-(\d+|\d*\.\d+)(e[+-]?\d+)?$/.test(arg)) return false;
+          return !this._getCommandAndAncestors().some(
+            (cmd) => cmd.options.map((opt) => opt.short).some((short) => /^-\d$/.test(short))
+          );
+        };
         let activeVariadicOption = null;
-        while (args.length) {
-          const arg = args.shift();
+        let activeGroup = null;
+        let i = 0;
+        while (i < args.length || activeGroup) {
+          const arg = activeGroup ?? args[i++];
+          activeGroup = null;
           if (arg === "--") {
             if (dest === unknown) dest.push(arg);
-            dest.push(...args);
+            dest.push(...args.slice(i));
             break;
           }
-          if (activeVariadicOption && !maybeOption(arg)) {
+          if (activeVariadicOption && (!maybeOption(arg) || negativeNumberArg(arg))) {
             this.emit(`option:${activeVariadicOption.name()}`, arg);
             continue;
           }
@@ -2616,13 +2687,13 @@ Expecting one of '${allowedValues.join("', '")}'`);
             const option = this._findOption(arg);
             if (option) {
               if (option.required) {
-                const value = args.shift();
+                const value = args[i++];
                 if (value === void 0) this.optionMissingArgument(option);
                 this.emit(`option:${option.name()}`, value);
               } else if (option.optional) {
                 let value = null;
-                if (args.length > 0 && !maybeOption(args[0])) {
-                  value = args.shift();
+                if (i < args.length && (!maybeOption(args[i]) || negativeNumberArg(args[i]))) {
+                  value = args[i++];
                 }
                 this.emit(`option:${option.name()}`, value);
               } else {
@@ -2639,7 +2710,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
                 this.emit(`option:${option.name()}`, arg.slice(2));
               } else {
                 this.emit(`option:${option.name()}`);
-                args.unshift(`-${arg.slice(2)}`);
+                activeGroup = `-${arg.slice(2)}`;
               }
               continue;
             }
@@ -2652,27 +2723,24 @@ Expecting one of '${allowedValues.join("', '")}'`);
               continue;
             }
           }
-          if (maybeOption(arg)) {
+          if (dest === operands && maybeOption(arg) && !(this.commands.length === 0 && negativeNumberArg(arg))) {
             dest = unknown;
           }
           if ((this._enablePositionalOptions || this._passThroughOptions) && operands.length === 0 && unknown.length === 0) {
             if (this._findCommand(arg)) {
               operands.push(arg);
-              if (args.length > 0) unknown.push(...args);
+              unknown.push(...args.slice(i));
               break;
             } else if (this._getHelpCommand() && arg === this._getHelpCommand().name()) {
-              operands.push(arg);
-              if (args.length > 0) operands.push(...args);
+              operands.push(arg, ...args.slice(i));
               break;
             } else if (this._defaultCommandName) {
-              unknown.push(arg);
-              if (args.length > 0) unknown.push(...args);
+              unknown.push(arg, ...args.slice(i));
               break;
             }
           }
           if (this._passThroughOptions) {
-            dest.push(arg);
-            if (args.length > 0) dest.push(...args);
+            dest.push(arg, ...args.slice(i));
             break;
           }
           dest.push(arg);
@@ -3025,6 +3093,69 @@ Expecting one of '${allowedValues.join("', '")}'`);
         return this;
       }
       /**
+       * Set/get the help group heading for this subcommand in parent command's help.
+       *
+       * @param {string} [heading]
+       * @return {Command | string}
+       */
+      helpGroup(heading) {
+        if (heading === void 0) return this._helpGroupHeading ?? "";
+        this._helpGroupHeading = heading;
+        return this;
+      }
+      /**
+       * Set/get the default help group heading for subcommands added to this command.
+       * (This does not override a group set directly on the subcommand using .helpGroup().)
+       *
+       * @example
+       * program.commandsGroup('Development Commands:);
+       * program.command('watch')...
+       * program.command('lint')...
+       * ...
+       *
+       * @param {string} [heading]
+       * @returns {Command | string}
+       */
+      commandsGroup(heading) {
+        if (heading === void 0) return this._defaultCommandGroup ?? "";
+        this._defaultCommandGroup = heading;
+        return this;
+      }
+      /**
+       * Set/get the default help group heading for options added to this command.
+       * (This does not override a group set directly on the option using .helpGroup().)
+       *
+       * @example
+       * program
+       *   .optionsGroup('Development Options:')
+       *   .option('-d, --debug', 'output extra debugging')
+       *   .option('-p, --profile', 'output profiling information')
+       *
+       * @param {string} [heading]
+       * @returns {Command | string}
+       */
+      optionsGroup(heading) {
+        if (heading === void 0) return this._defaultOptionGroup ?? "";
+        this._defaultOptionGroup = heading;
+        return this;
+      }
+      /**
+       * @param {Option} option
+       * @private
+       */
+      _initOptionGroup(option) {
+        if (this._defaultOptionGroup && !option.helpGroupHeading)
+          option.helpGroup(this._defaultOptionGroup);
+      }
+      /**
+       * @param {Command} cmd
+       * @private
+       */
+      _initCommandGroup(cmd) {
+        if (this._defaultCommandGroup && !cmd.helpGroup())
+          cmd.helpGroup(this._defaultCommandGroup);
+      }
+      /**
        * Set the name of the command from script filename, such as process.argv[1],
        * or require.main.filename, or __filename.
        *
@@ -3158,15 +3289,20 @@ Expecting one of '${allowedValues.join("', '")}'`);
       helpOption(flags, description) {
         if (typeof flags === "boolean") {
           if (flags) {
-            this._helpOption = this._helpOption ?? void 0;
+            if (this._helpOption === null) this._helpOption = void 0;
+            if (this._defaultOptionGroup) {
+              this._initOptionGroup(this._getHelpOption());
+            }
           } else {
             this._helpOption = null;
           }
           return this;
         }
-        flags = flags ?? "-h, --help";
-        description = description ?? "display help for command";
-        this._helpOption = this.createOption(flags, description);
+        this._helpOption = this.createOption(
+          flags ?? "-h, --help",
+          description ?? "display help for command"
+        );
+        if (flags || description) this._initOptionGroup(this._helpOption);
         return this;
       }
       /**
@@ -3191,6 +3327,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
        */
       addHelpOption(option) {
         this._helpOption = option;
+        this._initOptionGroup(option);
         return this;
       }
       /**
@@ -3303,9 +3440,9 @@ Expecting one of '${allowedValues.join("', '")}'`);
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/index.js
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/index.js
 var require_commander = __commonJS({
-  "../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/index.js"(exports2) {
+  "../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/index.js"(exports2) {
     "use strict";
     var { Argument: Argument2 } = require_argument();
     var { Command: Command2 } = require_command();
@@ -3326,7 +3463,7 @@ var require_commander = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/commander@13.1.0/node_modules/commander/esm.mjs
+// ../../node_modules/.pnpm/commander@14.0.3/node_modules/commander/esm.mjs
 var import_index = __toESM(require_commander(), 1);
 var {
   program,
@@ -3490,7 +3627,11 @@ async function uploadRequest(path, filePath) {
   };
   const contentType = mimeMap[ext] ?? "application/octet-stream";
   const formData = new FormData();
-  formData.append("file", new Blob([fileBuffer], { type: contentType }), fileName);
+  formData.append(
+    "file",
+    new Blob([fileBuffer], { type: contentType }),
+    fileName
+  );
   let res = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -3645,7 +3786,9 @@ var initCommand = new Command("init").description("Initialize VibeSKU CLI with y
     logger.plain(`  Config:  ${getConfigPath()}`);
     logger.plain("");
     logger.info("Run `vibesku templates` to see available templates.");
-    logger.dim("  Tip: Use `vibesku auth login` for browser-based authentication.");
+    logger.dim(
+      "  Tip: Use `vibesku auth login` for browser-based authentication."
+    );
   } catch (error) {
     spinner.fail("API key verification failed.");
     config.apiKey = void 0;
@@ -3658,7 +3801,9 @@ var initCommand = new Command("init").description("Initialize VibeSKU CLI with y
 });
 
 // src/commands/config.ts
-var configCommand = new Command("config").description("Manage CLI configuration");
+var configCommand = new Command("config").description(
+  "Manage CLI configuration"
+);
 configCommand.command("set-key <key>").description("Set your VibeSKU API key").action((key) => {
   if (!key.startsWith("vsk_")) {
     logger.warn("API key should start with 'vsk_'. Saving anyway.");
@@ -3677,7 +3822,9 @@ configCommand.command("set-url <url>").description("Set the API base URL").actio
 configCommand.command("show").description("Show current configuration").action(() => {
   const config = loadConfig();
   logger.plain(`Config file: ${getConfigPath()}`);
-  logger.plain(`API Key:     ${config.apiKey ? config.apiKey.slice(0, 8) + "..." : "(not set)"}`);
+  logger.plain(
+    `API Key:     ${config.apiKey ? config.apiKey.slice(0, 8) + "..." : "(not set)"}`
+  );
   logger.plain(`Base URL:    ${config.baseUrl ?? "(default)"}`);
 });
 configCommand.command("reset").description("Reset configuration to defaults").action(() => {
@@ -3782,7 +3929,8 @@ function printOption(name, opt) {
   const parts = [];
   parts.push(`type: ${opt.type}`);
   if (opt.required) parts.push("required");
-  if (opt.default !== void 0) parts.push(`default: ${JSON.stringify(opt.default)}`);
+  if (opt.default !== void 0)
+    parts.push(`default: ${JSON.stringify(opt.default)}`);
   logger.plain(`    ${name} (${parts.join(", ")})`);
   if (opt.description) {
     logger.plain(`      ${opt.description}`);
@@ -3869,26 +4017,34 @@ function formatDate(iso) {
 }
 
 // src/utils/open-browser.ts
-var import_node_child_process = require("child_process");
 var import_node_os2 = require("os");
-function openBrowser(url) {
+async function openBrowser(url) {
+  const { spawn } = await import("child_process");
   const os = (0, import_node_os2.platform)();
-  let cmd;
+  let command;
+  let args;
   switch (os) {
     case "darwin":
-      cmd = `open "${url}"`;
+      command = "open";
+      args = [url];
       break;
     case "win32":
-      cmd = `start "" "${url}"`;
+      command = "cmd";
+      args = ["/s", "/c", "start", '""', url];
       break;
     default:
-      cmd = `xdg-open "${url}"`;
+      command = "xdg-open";
+      args = [url];
       break;
   }
-  (0, import_node_child_process.exec)(cmd, (err) => {
-    if (err) {
-    }
+  const child = spawn(command, args, {
+    detached: true,
+    stdio: "ignore",
+    ...os === "win32" ? { windowsVerbatimArguments: true } : {}
   });
+  child.on("error", () => {
+  });
+  child.unref();
 }
 
 // src/utils/prompt.ts
@@ -3905,7 +4061,9 @@ function promptChoice(message) {
 
 // src/commands/credits.ts
 var LOW_BALANCE_THRESHOLD = 10;
-var creditsCommand = new Command("credits").description("Manage credits and balance");
+var creditsCommand = new Command("credits").description(
+  "Manage credits and balance"
+);
 creditsCommand.command("show", { isDefault: true }).description("Check credit balance").option("--json", "Output as JSON").action(async (opts) => {
   const spinner = new Spinner("Fetching credits...").start();
   try {
@@ -3926,9 +4084,7 @@ creditsCommand.command("show", { isDefault: true }).description("Check credit ba
     );
     if (data.totalBalance < LOW_BALANCE_THRESHOLD) {
       logger.plain("");
-      logger.warn(
-        "Low balance! Run `vibesku credits buy` to top up."
-      );
+      logger.warn("Low balance! Run `vibesku credits buy` to top up.");
     }
   } catch (error) {
     spinner.fail("Failed to fetch credits.");
@@ -3936,120 +4092,147 @@ creditsCommand.command("show", { isDefault: true }).description("Check credit ba
     process.exit(1);
   }
 });
-creditsCommand.command("buy").description("Purchase credits or subscribe to a plan").option("--tier <id>", "Tier/product ID").option("--mode <mode>", "Payment mode: subscription or one_time").option("--cycle <cycle>", "Billing cycle: monthly or yearly (subscriptions only)").option("--no-browser", "Print the checkout URL instead of opening a browser").option("--json", "Output as JSON").action(async (opts) => {
-  const spinner = new Spinner("Fetching pricing...").start();
-  let plans;
-  let packs;
-  try {
-    const { data } = await api.getPricing();
-    plans = data.plans;
-    packs = data.packs;
-    spinner.stop();
-  } catch (error) {
-    spinner.fail("Failed to fetch pricing.");
-    if (error instanceof ApiError && error.code === "BILLING_NOT_CONFIGURED") {
-      logger.error("Billing is not configured. Contact your administrator.");
-    } else if (error instanceof Error) {
-      logger.error(error.message);
-    }
-    process.exit(1);
-  }
-  if (plans.length === 0 && packs.length === 0) {
-    logger.error("No pricing plans available. Contact support.");
-    process.exit(1);
-  }
-  let tierId = opts.tier;
-  let paymentMode = opts.mode;
-  let billingCycle = opts.cycle;
-  if (!tierId && process.stdout.isTTY) {
-    const menu = [];
-    let idx = 1;
-    if (packs.length > 0) {
-      logger.plain("");
-      logger.plain("  Credit Packs:");
-      for (const pack of packs) {
-        const popular = pack.isPopular ? "  \u2B50 Popular" : "";
-        const label = `  [${idx}] ${pack.name.padEnd(20)} ${String(pack.creditAllowance).padStart(6)} credits    $${pack.prices.oneTime.toFixed(2)}${popular}`;
-        logger.plain(label);
-        menu.push({ index: idx, label: pack.name, tierId: pack.id, mode: "one_time" });
-        idx++;
-      }
-    }
-    if (plans.length > 0) {
-      logger.plain("");
-      logger.plain("  Subscriptions (monthly):");
-      for (const plan of plans) {
-        const popular = plan.isPopular ? "  \u2B50 Popular" : "";
-        const label = `  [${idx}] ${plan.name.padEnd(20)} ${String(plan.creditAllowance).padStart(6)} credits/mo    $${plan.prices.monthly.toFixed(2)}/mo  ($${plan.prices.yearly.toFixed(2)}/yr)${popular}`;
-        logger.plain(label);
-        menu.push({ index: idx, label: plan.name, tierId: plan.id, mode: "subscription" });
-        idx++;
-      }
-    }
-    logger.plain("");
-    const answer = await promptChoice(`  Select [1-${idx - 1}] (q to cancel): `);
-    if (answer.toLowerCase() === "q" || answer === "") {
-      logger.dim("  Cancelled.");
-      return;
-    }
-    const choice = Number(answer);
-    const selected = menu.find((m) => m.index === choice);
-    if (!selected) {
-      logger.error("Invalid selection.");
-      process.exit(1);
-    }
-    tierId = selected.tierId;
-    paymentMode = selected.mode;
-    if (paymentMode === "subscription" && !billingCycle) {
-      const cycleAnswer = await promptChoice("  Billing cycle [monthly/yearly] (default: monthly): ");
-      if (cycleAnswer === "yearly" || cycleAnswer === "y") {
-        billingCycle = "yearly";
-      } else {
-        billingCycle = "monthly";
-      }
-    }
-  }
-  if (!tierId || !paymentMode) {
-    logger.error("Missing --tier and --mode flags. Run interactively or provide both.");
-    process.exit(1);
-  }
-  const checkoutSpinner = new Spinner("Creating checkout session...").start();
-  try {
-    const { data } = await api.createCheckout({
-      tierId,
-      paymentMode,
-      billingCycle
-    });
-    checkoutSpinner.succeed("Checkout session created!");
-    if (opts.json) {
-      logger.plain(formatJson(data));
-      return;
-    }
-    if (opts.browser) {
-      logger.info("Opening browser to complete payment...");
-      openBrowser(data.checkoutUrl);
-      logger.plain("");
-      logger.dim("  If the browser didn't open, visit:");
-      logger.plain(`  ${data.checkoutUrl}`);
-    } else {
-      logger.plain("");
-      logger.plain("  Complete your purchase at:");
-      logger.plain(`  ${data.checkoutUrl}`);
-    }
-  } catch (error) {
-    checkoutSpinner.fail("Failed to create checkout session.");
-    if (error instanceof ApiError) {
-      if (error.code === "BILLING_NOT_CONFIGURED") {
-        logger.error("Billing is not configured. Contact your administrator.");
-      } else {
+creditsCommand.command("buy").description("Purchase credits or subscribe to a plan").option("--tier <id>", "Tier/product ID").option("--mode <mode>", "Payment mode: subscription or one_time").option(
+  "--cycle <cycle>",
+  "Billing cycle: monthly or yearly (subscriptions only)"
+).option("--no-browser", "Print the checkout URL instead of opening a browser").option("--json", "Output as JSON").action(
+  async (opts) => {
+    const spinner = new Spinner("Fetching pricing...").start();
+    let plans;
+    let packs;
+    try {
+      const { data } = await api.getPricing();
+      plans = data.plans;
+      packs = data.packs;
+      spinner.stop();
+    } catch (error) {
+      spinner.fail("Failed to fetch pricing.");
+      if (error instanceof ApiError && error.code === "BILLING_NOT_CONFIGURED") {
+        logger.error(
+          "Billing is not configured. Contact your administrator."
+        );
+      } else if (error instanceof Error) {
         logger.error(error.message);
       }
-    } else if (error instanceof Error) {
-      logger.error(error.message);
+      process.exit(1);
     }
-    process.exit(1);
+    if (plans.length === 0 && packs.length === 0) {
+      logger.error("No pricing plans available. Contact support.");
+      process.exit(1);
+    }
+    let tierId = opts.tier;
+    let paymentMode = opts.mode;
+    let billingCycle = opts.cycle;
+    if (!tierId && process.stdout.isTTY) {
+      const menu = [];
+      let idx = 1;
+      if (packs.length > 0) {
+        logger.plain("");
+        logger.plain("  Credit Packs:");
+        for (const pack of packs) {
+          const popular = pack.isPopular ? "  \u2B50 Popular" : "";
+          const label = `  [${idx}] ${pack.name.padEnd(20)} ${String(pack.creditAllowance).padStart(6)} credits    $${pack.prices.oneTime.toFixed(2)}${popular}`;
+          logger.plain(label);
+          menu.push({
+            index: idx,
+            label: pack.name,
+            tierId: pack.id,
+            mode: "one_time"
+          });
+          idx++;
+        }
+      }
+      if (plans.length > 0) {
+        logger.plain("");
+        logger.plain("  Subscriptions (monthly):");
+        for (const plan of plans) {
+          const popular = plan.isPopular ? "  \u2B50 Popular" : "";
+          const label = `  [${idx}] ${plan.name.padEnd(20)} ${String(plan.creditAllowance).padStart(6)} credits/mo    $${plan.prices.monthly.toFixed(2)}/mo  ($${plan.prices.yearly.toFixed(2)}/yr)${popular}`;
+          logger.plain(label);
+          menu.push({
+            index: idx,
+            label: plan.name,
+            tierId: plan.id,
+            mode: "subscription"
+          });
+          idx++;
+        }
+      }
+      logger.plain("");
+      const answer = await promptChoice(
+        `  Select [1-${idx - 1}] (q to cancel): `
+      );
+      if (answer.toLowerCase() === "q" || answer === "") {
+        logger.dim("  Cancelled.");
+        return;
+      }
+      const choice = Number(answer);
+      const selected = menu.find((m) => m.index === choice);
+      if (!selected) {
+        logger.error("Invalid selection.");
+        process.exit(1);
+      }
+      tierId = selected.tierId;
+      paymentMode = selected.mode;
+      if (paymentMode === "subscription" && !billingCycle) {
+        const cycleAnswer = await promptChoice(
+          "  Billing cycle [monthly/yearly] (default: monthly): "
+        );
+        if (cycleAnswer === "yearly" || cycleAnswer === "y") {
+          billingCycle = "yearly";
+        } else {
+          billingCycle = "monthly";
+        }
+      }
+    }
+    if (!tierId || !paymentMode) {
+      logger.error(
+        "Missing --tier and --mode flags. Run interactively or provide both."
+      );
+      process.exit(1);
+    }
+    const checkoutSpinner = new Spinner(
+      "Creating checkout session..."
+    ).start();
+    try {
+      const { data } = await api.createCheckout({
+        tierId,
+        paymentMode,
+        billingCycle
+      });
+      checkoutSpinner.succeed("Checkout session created!");
+      if (opts.json) {
+        logger.plain(formatJson(data));
+        return;
+      }
+      if (opts.browser) {
+        logger.info("Opening browser to complete payment...");
+        await openBrowser(data.checkoutUrl);
+        logger.plain("");
+        logger.dim("  If the browser didn't open, visit:");
+        logger.plain(`  ${data.checkoutUrl}`);
+      } else {
+        logger.plain("");
+        logger.plain("  Complete your purchase at:");
+        logger.plain(`  ${data.checkoutUrl}`);
+      }
+    } catch (error) {
+      checkoutSpinner.fail("Failed to create checkout session.");
+      if (error instanceof ApiError) {
+        if (error.code === "BILLING_NOT_CONFIGURED") {
+          logger.error(
+            "Billing is not configured. Contact your administrator."
+          );
+        } else {
+          logger.error(error.message);
+        }
+      } else if (error instanceof Error) {
+        logger.error(error.message);
+      }
+      process.exit(1);
+    }
   }
-});
+);
 var redeemErrors = {
   INVALID_REDEEM_CODE: "Invalid redemption code. Please check and try again.",
   CODE_ALREADY_REDEEMED: "This code has already been redeemed.",
@@ -4066,7 +4249,9 @@ creditsCommand.command("redeem <code>").description("Redeem a credit code").opti
       return;
     }
     logger.plain(`  Credits added:     ${formatCredits(data.creditsAdded)}`);
-    logger.plain(`  New paid balance:  ${formatCredits(data.newPaidBalance)}`);
+    logger.plain(
+      `  New paid balance:  ${formatCredits(data.newPaidBalance)}`
+    );
   } catch (error) {
     spinner.fail("Failed to redeem code.");
     if (error instanceof ApiError) {
@@ -4081,7 +4266,10 @@ creditsCommand.command("redeem <code>").description("Redeem a credit code").opti
 
 // src/commands/generate.ts
 var import_node_fs2 = require("fs");
-var generateCommand = new Command("generate").description("Generate content from a template").requiredOption("-t, --template <id>", "Template ID (e.g. ecom-hero)").option("-n, --product-name <name>", "Product name").option("-d, --product-details <details>", "Product details/description").option("-b, --brand <name>", "Brand name").option("-i, --images <paths...>", "Product image file paths to upload").option("-l, --logo <path>", "Logo image file path to upload").option("-o, --options <json>", 'Template options as JSON (run "vibesku templates info <id>" to see available options)').option("--json", "Output as JSON").action(async (opts) => {
+var generateCommand = new Command("generate").description("Generate content from a template").requiredOption("-t, --template <id>", "Template ID (e.g. ecom-hero)").option("-n, --product-name <name>", "Product name").option("-d, --product-details <details>", "Product details/description").option("-b, --brand <name>", "Brand name").option("-i, --images <paths...>", "Product image file paths to upload").option("-l, --logo <path>", "Logo image file path to upload").option(
+  "-o, --options <json>",
+  'Template options as JSON (run "vibesku templates info <id>" to see available options)'
+).option("--json", "Output as JSON").action(async (opts) => {
   const {
     template: templateId,
     productName,
@@ -4094,7 +4282,9 @@ var generateCommand = new Command("generate").description("Generate content from
   } = opts;
   const assetIds = {};
   if (images?.length) {
-    const uploadSpinner = new Spinner(`Uploading ${images.length} image(s)...`).start();
+    const uploadSpinner = new Spinner(
+      `Uploading ${images.length} image(s)...`
+    ).start();
     try {
       const uploaded = [];
       for (const imgPath of images) {
@@ -4158,7 +4348,9 @@ var generateCommand = new Command("generate").description("Generate content from
       logger.plain("");
       logger.plain(`  Job ID:             ${data.jobId}`);
       logger.plain(`  Status:             ${data.status}`);
-      logger.plain(`  Credits remaining:  ${formatCredits(data.creditsRemaining)}`);
+      logger.plain(
+        `  Credits remaining:  ${formatCredits(data.creditsRemaining)}`
+      );
       logger.plain("");
       logger.info(`Track progress with: vibesku status ${data.jobId}`);
     }
@@ -4168,7 +4360,9 @@ var generateCommand = new Command("generate").description("Generate content from
       const details = error.details;
       const required = details?.required ?? "unknown";
       const available = details?.available ?? "unknown";
-      logger.error(`Insufficient credits: ${required} required, ${available} available.`);
+      logger.error(
+        `Insufficient credits: ${required} required, ${available} available.`
+      );
       logger.plain("");
       logger.info("Run `vibesku credits buy` to purchase credits.");
       logger.info("Run `vibesku credits redeem <code>` to redeem a code.");
@@ -4216,6 +4410,17 @@ var statusCommand = new Command("status").description("Check job status and deta
         )
       );
     }
+    if (!dto.activeRuns.length && dto.latestRun) {
+      const { runId, status, error } = dto.latestRun;
+      logger.plain("");
+      logger.plain(
+        formatKeyValue([
+          ["Latest Run", runId],
+          ["Status", status],
+          ...error ? [["Details", error]] : []
+        ])
+      );
+    }
     if (dto.outputs.length > 0) {
       logger.plain("");
       logger.plain("Outputs:");
@@ -4247,14 +4452,12 @@ var statusCommand = new Command("status").description("Check job status and deta
     const poll = async () => {
       try {
         const dto = await showStatus();
-        const allDone = dto.activeRuns.length === 0 || dto.activeRuns.every((r) => r.status === "SUCCEEDED" || r.status === "FAILED");
-        if (allDone && dto.activeRuns.length > 0) {
-          logger.plain("");
-          logger.success("All runs completed.");
+        if (!dto.activeRuns.length && dto.latestRun?.status === "FAILED") {
+          logger.error(dto.latestRun.error ?? "The latest run failed.");
+          process.exitCode = 1;
           return;
         }
-        if (dto.activeRuns.length === 0 && dto.outputs.length > 0) {
-          logger.plain("");
+        if (!dto.activeRuns.length && (dto.latestRun?.status === "SUCCEEDED" || !dto.latestRun && dto.outputs.length > 0)) {
           logger.success("Job complete.");
           return;
         }
@@ -4287,53 +4490,65 @@ var statusCommand = new Command("status").description("Check job status and deta
 });
 
 // src/commands/jobs.ts
-var jobsCommand = new Command("jobs").description("List your jobs").option("-p, --page <number>", "Page number", "1").option("-s, --page-size <number>", "Items per page", "20").option("-t, --template <id>", "Filter by template ID").option("--json", "Output as JSON").action(async (opts) => {
-  const spinner = new Spinner("Fetching jobs...").start();
-  try {
-    const { data } = await api.listJobs({
-      page: Number(opts.page),
-      pageSize: Number(opts.pageSize),
-      templateId: opts.template
-    });
-    spinner.stop();
-    if (opts.json) {
-      logger.plain(formatJson(data));
-      return;
+var jobsCommand = new Command("jobs").description("List your jobs").option("-p, --page <number>", "Page number", "1").option("-s, --page-size <number>", "Items per page", "20").option("-t, --template <id>", "Filter by template ID").option("--json", "Output as JSON").action(
+  async (opts) => {
+    const spinner = new Spinner("Fetching jobs...").start();
+    try {
+      const { data } = await api.listJobs({
+        page: Number(opts.page),
+        pageSize: Number(opts.pageSize),
+        templateId: opts.template
+      });
+      spinner.stop();
+      if (opts.json) {
+        logger.plain(formatJson(data));
+        return;
+      }
+      logger.plain(
+        `Total: ${data.total} jobs (page ${data.page}/${Math.ceil(data.total / data.pageSize) || 1})
+`
+      );
+      const rows = data.items.map((j) => ({
+        id: j.id.slice(0, 8),
+        template: j.templateId,
+        version: j.templateVersion,
+        created: new Date(j.createdAt).toLocaleDateString(),
+        updated: new Date(j.updatedAt).toLocaleDateString()
+      }));
+      logger.plain(
+        formatTable(rows, [
+          { key: "id", label: "Job ID", width: 10 },
+          { key: "template", label: "Template", width: 16 },
+          { key: "version", label: "Ver", width: 5 },
+          { key: "created", label: "Created", width: 12 },
+          { key: "updated", label: "Updated", width: 12 }
+        ])
+      );
+    } catch (error) {
+      spinner.fail("Failed to fetch jobs.");
+      if (error instanceof Error) logger.error(error.message);
+      process.exit(1);
     }
-    logger.plain(`Total: ${data.total} jobs (page ${data.page}/${Math.ceil(data.total / data.pageSize) || 1})
-`);
-    const rows = data.items.map((j) => ({
-      id: j.id.slice(0, 8),
-      template: j.templateId,
-      version: j.templateVersion,
-      created: new Date(j.createdAt).toLocaleDateString(),
-      updated: new Date(j.updatedAt).toLocaleDateString()
-    }));
-    logger.plain(
-      formatTable(rows, [
-        { key: "id", label: "Job ID", width: 10 },
-        { key: "template", label: "Template", width: 16 },
-        { key: "version", label: "Ver", width: 5 },
-        { key: "created", label: "Created", width: 12 },
-        { key: "updated", label: "Updated", width: 12 }
-      ])
-    );
-  } catch (error) {
-    spinner.fail("Failed to fetch jobs.");
-    if (error instanceof Error) logger.error(error.message);
-    process.exit(1);
   }
-});
+);
 
 // src/commands/export.ts
 var import_promises = require("fs/promises");
 var import_node_path2 = require("path");
+var extensionFor = (type2, url) => {
+  if (type2 === "VIDEO") return ".mp4";
+  if (url.includes(".png")) return ".png";
+  if (url.includes(".webp")) return ".webp";
+  return ".jpg";
+};
 var exportCommand = new Command("export").description("Download job outputs").argument("<job-id>", "Job ID to export").option("-o, --output-dir <dir>", "Output directory", ".").option("--output-id <id>", "Download specific output only").option("--json", "Output metadata as JSON instead of downloading").action(
   async (jobId, opts) => {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (opts.outputId && !UUID_RE.test(opts.outputId)) {
       logger.error(`Invalid output ID format: '${opts.outputId}'`);
-      logger.plain("  Expected a full UUID (e.g. beb47f34-fdf8-49c4-9b9f-96bd367ed145).");
+      logger.plain(
+        "  Expected a full UUID (e.g. beb47f34-fdf8-49c4-9b9f-96bd367ed145)."
+      );
       logger.info("Run `vibesku status <job-id>` to see full output IDs.");
       process.exit(1);
     }
@@ -4352,16 +4567,19 @@ var exportCommand = new Command("export").description("Download job outputs").ar
       await (0, import_promises.mkdir)(opts.outputDir, { recursive: true });
       let downloadCount = 0;
       for (const output of data.outputs) {
-        if (output.type === "IMAGE" && output.imageUrl) {
-          const dlSpinner = new Spinner(`Downloading ${output.id.slice(0, 8)}...`).start();
+        const mediaUrl = output.imageUrl ?? output.videoUrl;
+        if (mediaUrl) {
+          const dlSpinner = new Spinner(
+            `Downloading ${output.id.slice(0, 8)}...`
+          ).start();
           try {
-            const res = await fetch(output.imageUrl);
+            const res = await fetch(mediaUrl);
             if (!res.ok) {
               dlSpinner.fail(`Failed to download ${output.id.slice(0, 8)}`);
               continue;
             }
             const buffer = Buffer.from(await res.arrayBuffer());
-            const ext = output.imageUrl.includes(".png") ? ".png" : output.imageUrl.includes(".webp") ? ".webp" : ".jpg";
+            const ext = extensionFor(output.type, mediaUrl);
             const fileName = `${output.id}${ext}`;
             await (0, import_promises.writeFile)((0, import_node_path2.join)(opts.outputDir, fileName), buffer);
             dlSpinner.succeed(`Saved ${fileName}`);
@@ -4377,14 +4595,18 @@ var exportCommand = new Command("export").description("Download job outputs").ar
         }
       }
       logger.plain("");
-      logger.success(`Downloaded ${downloadCount}/${data.outputs.length} outputs to ${opts.outputDir}`);
+      logger.success(
+        `Downloaded ${downloadCount}/${data.outputs.length} outputs to ${opts.outputDir}`
+      );
     } catch (error) {
       spinner.fail("Failed to export outputs.");
       if (error instanceof ApiError) {
         if (error.code === "JOB_NOT_FOUND") {
           logger.error(`Job '${jobId}' not found.`);
         } else if (error.code === "OUTPUT_NOT_FOUND") {
-          logger.error(`Output '${opts.outputId}' not found in job '${jobId}'.`);
+          logger.error(
+            `Output '${opts.outputId}' not found in job '${jobId}'.`
+          );
         } else {
           logger.error(`${error.code}: ${error.message}`);
         }
@@ -4423,7 +4645,9 @@ var batchCommand = new Command("batch").description("Run batch generation from a
   const results = [];
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    const spinner = new Spinner(`[${i + 1}/${items.length}] Generating ${item.templateId}...`).start();
+    const spinner = new Spinner(
+      `[${i + 1}/${items.length}] Generating ${item.templateId}...`
+    ).start();
     try {
       const { data } = await api.generate({
         templateId: item.templateId,
@@ -4431,7 +4655,9 @@ var batchCommand = new Command("batch").description("Run batch generation from a
         assetIds: item.assetIds,
         options: item.options
       });
-      spinner.succeed(`[${i + 1}/${items.length}] Job ${data.jobId} started.`);
+      spinner.succeed(
+        `[${i + 1}/${items.length}] Job ${data.jobId} started.`
+      );
       results.push({ index: i, jobId: data.jobId });
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Unknown error";
@@ -4481,10 +4707,11 @@ authCommand.command("login").description("Sign in via browser-based device autho
   let deviceCode;
   let userCode;
   let interval;
-  let expiresIn;
+  let deadline;
   try {
     const res = await fetch(`${baseUrl}/api/v1/device/code`, {
       method: "POST",
+      signal: AbortSignal.timeout(15e3),
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ clientName, clientVersion: cliVersion })
     });
@@ -4497,7 +4724,7 @@ authCommand.command("login").description("Sign in via browser-based device autho
     deviceCode = envelope.data.deviceCode;
     userCode = envelope.data.userCode;
     interval = envelope.data.interval;
-    expiresIn = envelope.data.expiresIn;
+    deadline = Date.now() + envelope.data.expiresIn * 1e3;
   } catch (error) {
     spinner.fail("Failed to connect to server.");
     if (error instanceof Error) logger.error(error.message);
@@ -4512,7 +4739,7 @@ authCommand.command("login").description("Sign in via browser-based device autho
   const fullUrl = `${baseUrl}/device?code=${encodeURIComponent(userCode)}`;
   if (shouldOpenBrowser) {
     logger.info(`Opening browser to authorize...`);
-    openBrowser(fullUrl);
+    await openBrowser(fullUrl);
   } else {
     logger.plain(`  Open this URL in your browser:`);
     logger.plain(`  ${fullUrl}`);
@@ -4522,7 +4749,6 @@ authCommand.command("login").description("Sign in via browser-based device autho
   let pollInterval = interval;
   let consecutiveErrors = 0;
   const startTime = Date.now();
-  const deadline = startTime + expiresIn * 1e3;
   let cancelled = false;
   const onSigint = () => {
     cancelled = true;
@@ -4532,8 +4758,9 @@ authCommand.command("login").description("Sign in via browser-based device autho
   process.on("SIGINT", onSigint);
   try {
     while (!cancelled && Date.now() < deadline) {
-      await sleep(pollInterval * 1e3);
-      if (cancelled) break;
+      await sleep(Math.min(pollInterval * 1e3, deadline - Date.now()));
+      const remaining = deadline - Date.now();
+      if (cancelled || remaining <= 0) break;
       const elapsed = Date.now() - startTime;
       if (elapsed > 12e4 && elapsed < 12e4 + pollInterval * 1e3 + 500) {
         spinner.stop();
@@ -4546,6 +4773,7 @@ authCommand.command("login").description("Sign in via browser-based device autho
       try {
         const res = await fetch(`${baseUrl}/api/v1/device/token`, {
           method: "POST",
+          signal: AbortSignal.timeout(Math.min(15e3, remaining)),
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ deviceCode })
         });
@@ -4570,17 +4798,15 @@ authCommand.command("login").description("Sign in via browser-based device autho
           try {
             const verifyRes = await api.authVerify();
             const user = verifyRes.data.user;
+            logger.plain(`  Welcome, ${user.name || user.email}!`);
             logger.plain(
-              `  Welcome, ${user.name || user.email}!`
+              `  Credits: ${verifyRes.data.plan.creditsRemaining}`
             );
-            logger.plain(`  Credits: ${verifyRes.data.plan.creditsRemaining}`);
           } catch {
           }
           logger.plain(`  Config:  ${getConfigPath()}`);
           logger.plain("");
-          logger.info(
-            "Run `vibesku templates` to see available templates."
-          );
+          logger.info("Run `vibesku templates` to see available templates.");
           return;
         }
         if (data.status === "expired") {
@@ -4598,7 +4824,7 @@ authCommand.command("login").description("Sign in via browser-based device autho
           );
           process.exit(1);
         }
-        await sleep(2e3);
+        await sleep(Math.max(0, Math.min(2e3, deadline - Date.now())));
       }
     }
     if (!cancelled) {
@@ -4627,7 +4853,9 @@ authCommand.command("logout").description("Sign out and clear stored credentials
   saveConfig(config);
   logger.success("Logged out. Stored token cleared.");
   if (config.apiKey) {
-    logger.dim("  Note: API key is still configured. Use `vibesku config set-key` to manage.");
+    logger.dim(
+      "  Note: API key is still configured. Use `vibesku config set-key` to manage."
+    );
   }
 });
 authCommand.command("status").description("Show current authentication status").action(async () => {
@@ -4637,9 +4865,7 @@ authCommand.command("status").description("Show current authentication status").
   logger.plain(`  Server:  ${getBaseUrl()}`);
   logger.plain("");
   if (!token) {
-    logger.warn(
-      "Not authenticated. Run `vibesku auth login` to sign in."
-    );
+    logger.warn("Not authenticated. Run `vibesku auth login` to sign in.");
     return;
   }
   if (token.startsWith("vst_")) {
@@ -4648,11 +4874,15 @@ authCommand.command("status").description("Show current authentication status").
       const expires = new Date(config.tokenExpiresAt);
       const remaining = expires.getTime() - Date.now();
       if (remaining <= 0) {
-        logger.warn("  Token expired. Run `vibesku auth login` to re-authenticate.");
+        logger.warn(
+          "  Token expired. Run `vibesku auth login` to re-authenticate."
+        );
         return;
       }
       const days = Math.floor(remaining / (1e3 * 60 * 60 * 24));
-      logger.plain(`  Expires: ${expires.toLocaleDateString()} (${days} days)`);
+      logger.plain(
+        `  Expires: ${expires.toLocaleDateString()} (${days} days)`
+      );
     }
   } else if (token.startsWith("vsk_")) {
     const source = process.env.VIBESKU_API_KEY ? "env var" : "config file";
@@ -4727,13 +4957,20 @@ var refineCommand = new Command("refine").description("Refine an existing output
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_RE.test(outputId)) {
     logger.error(`Invalid output ID format: '${outputId}'`);
-    logger.plain("  Expected a full UUID (e.g. beb47f34-fdf8-49c4-9b9f-96bd367ed145).");
-    logger.info("Run `vibesku status <job-id> --json` to see full output IDs.");
+    logger.plain(
+      "  Expected a full UUID (e.g. beb47f34-fdf8-49c4-9b9f-96bd367ed145)."
+    );
+    logger.info(
+      "Run `vibesku status <job-id> --json` to see full output IDs."
+    );
     process.exit(1);
   }
   if (!skipConfirm) {
     const { createInterface: createInterface2 } = await import("readline");
-    const rl = createInterface2({ input: process.stdin, output: process.stdout });
+    const rl = createInterface2({
+      input: process.stdin,
+      output: process.stdout
+    });
     const answer = await new Promise((resolve) => {
       rl.question("Refining will consume credits. Continue? (y/N) ", resolve);
     });
@@ -4761,7 +4998,9 @@ var refineCommand = new Command("refine").description("Refine an existing output
       logger.plain(`  Run ID:             ${data.runId}`);
       logger.plain(`  Job ID:             ${data.jobId}`);
       logger.plain(`  Status:             ${data.status}`);
-      logger.plain(`  Credits remaining:  ${formatCredits(data.creditsRemaining)}`);
+      logger.plain(
+        `  Credits remaining:  ${formatCredits(data.creditsRemaining)}`
+      );
       logger.plain("");
       logger.info(`Track progress with: vibesku status ${data.jobId}`);
     }
@@ -4771,7 +5010,9 @@ var refineCommand = new Command("refine").description("Refine an existing output
       const details = error.details;
       const required = details?.required ?? "unknown";
       const available = details?.available ?? "unknown";
-      logger.error(`Insufficient credits: ${required} required, ${available} available.`);
+      logger.error(
+        `Insufficient credits: ${required} required, ${available} available.`
+      );
       logger.plain("");
       logger.info("Run `vibesku credits buy` to purchase credits.");
       logger.info("Run `vibesku credits redeem <code>` to redeem a code.");
