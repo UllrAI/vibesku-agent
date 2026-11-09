@@ -51,6 +51,8 @@ For version checks and auto-update workflow, see [versioning.md](references/vers
 
 ## Authentication
 
+Device authorization stops when its code expires. Run `vibesku auth login` again to request a new code.
+
 Two methods, resolved in priority order:
 
 1. **CLI token** (`vibesku auth login`) — browser-based device flow, tokens at `~/.vibesku/config.json`
