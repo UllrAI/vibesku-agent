@@ -4,7 +4,7 @@
 
 **When to use**: User needs a clean white-background product image with minimal styling and no extra scene context.
 
-**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K = 1 credit, 2K = 2 credits, 4K = 4 credits
 
 ## Assets
 

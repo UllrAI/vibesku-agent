@@ -8,7 +8,7 @@ Create a short absurdist commercial built around a real brand trait. The first c
 
 - Provide a brand name and description, or at least one reference image or logo. Up to four product or style references and one logo are supported.
 - Leave `creativeDirection` blank for VibeSKU to invent the premise, or provide up to 500 characters of story and visual guidance. The script and storyboard both use this direction. For example, combine an emergency-room setup with plush stop-motion, colorful 2D animation, or a realistic live-action look. Avoid unsupported product claims.
-- Script: 1 credit. Storyboard: 1 credit for each image.
+- Script: 1 credit. Storyboard: 2 credits per 2K image.
 - Video: 10–15 whole seconds, default 10, at 3 credits/second for 480p or 5 credits/second for 720p. Choose portrait (9:16, default), landscape (16:9), or square (1:1), all with native audio. Confirm the video cost before rendering.
 
 In the web workspace, choose the video orientation under Look and output. The primary action advances from script to storyboard to video. The results area has separate Script, Storyboard, and Video tabs. It opens the running stage or the most recent output by default. Review the script and storyboard at each stage, and use the redraw action next to the storyboard preview to replace it.

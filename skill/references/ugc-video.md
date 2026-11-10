@@ -6,7 +6,7 @@
 
 **Output type**: VIDEO | **Supports analysis**: No | **Cost**: **billed per second** — 480p = 3 credits/s, 720p = 5 credits/s
 
-> ⚠️ **This template is far more expensive than any image template.** A 15-second 720p clip costs **75 credits**, versus 1-2 credits for a still. Always confirm duration and resolution with the user, and state the total cost, before running `vibesku generate`.
+> ⚠️ **This template is far more expensive than any image template.** A 15-second 720p clip costs **75 credits**, versus 1–4 credits for a still. Always confirm duration and resolution with the user, and state the total cost, before running `vibesku generate`.
 >
 > Cost = `durationSeconds × rate(resolution)`. Credits are reserved before the job is submitted and refunded automatically if it fails.
 

@@ -4,7 +4,7 @@
 
 **When to use**: User wants one product photo rendered in a believable real-life environment rather than a poster, exploded infographic, or white-background packshot.
 
-**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K = 1 credit, 2K = 2 credits, 4K = 4 credits
 
 ## Assets
 

@@ -4,7 +4,7 @@
 
 **When to use**: User needs a COMPLETE visual set for a product detail page, campaign, or brand presentation. This is VibeSKU's signature "VisionKV™" capability.
 
-**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit/scene, 4K = 2 credits/scene
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K = 1 credit, 2K = 2 credits, 4K = 4 credits per scene
 
 ## Assets
 
@@ -187,7 +187,7 @@ vibesku generate -t kv-image-set \
 
 ## Tips
 
-- **Billing**: Each scene = 1 poster = 1 credit (2K) or 2 credits (4K). A 5-scene set at 2K costs 5 credits.
+- **Billing**: Each scene = 1 poster = 1 credit (1K), 2 credits (2K), or 4 credits (4K). A 5-scene set at 2K costs 10 credits.
 - **Scene order**: `kv-hero` should almost always be first — it establishes the visual identity for the set.
 - **Coherence**: Style and typography are applied across ALL posters, so the set looks professionally coordinated.
 - **Default language**: `zh` + `en` (bilingual) — designed for Chinese e-commerce detail pages. Change `primaryLang`/`secondaryLang` for other markets.
