@@ -4266,12 +4266,16 @@ creditsCommand.command("redeem <code>").description("Redeem a credit code").opti
 
 // src/commands/generate.ts
 var import_node_fs2 = require("fs");
-var generateCommand = new Command("generate").description("Generate content from a template").requiredOption("-t, --template <id>", "Template ID (e.g. ecom-hero)").option("-n, --product-name <name>", "Product name").option("-d, --product-details <details>", "Product details/description").option("-b, --brand <name>", "Brand name").option("-i, --images <paths...>", "Product image file paths to upload").option("-l, --logo <path>", "Logo image file path to upload").option(
+var generateCommand = new Command("generate").description("Generate content from a template").requiredOption("-t, --template <id>", "Template ID (e.g. ecom-hero)").option(
+  "--job <id>",
+  "Continue a creative-ad-video job after reviewing its storyboard"
+).option("-n, --product-name <name>", "Product name").option("-d, --product-details <details>", "Product details/description").option("-b, --brand <name>", "Brand name").option("-i, --images <paths...>", "Product image file paths to upload").option("-l, --logo <path>", "Logo image file path to upload").option(
   "-o, --options <json>",
   'Template options as JSON (run "vibesku templates info <id>" to see available options)'
 ).option("--json", "Output as JSON").action(async (opts) => {
   const {
     template: templateId,
+    job: jobId,
     productName,
     productDetails,
     brand,
@@ -4280,6 +4284,12 @@ var generateCommand = new Command("generate").description("Generate content from
     options: optionsJson,
     json: jsonOutput
   } = opts;
+  if (jobId && (templateId !== "creative-ad-video" || images?.length || logo || productName || productDetails || brand)) {
+    logger.error(
+      "--job continues a creative-ad-video job without changing its brief or images."
+    );
+    process.exit(1);
+  }
   const assetIds = {};
   if (images?.length) {
     const uploadSpinner = new Spinner(
@@ -4334,6 +4344,7 @@ var generateCommand = new Command("generate").description("Generate content from
   }
   const req = {
     templateId,
+    ...jobId && { jobId },
     brief: Object.keys(brief).length > 0 ? brief : void 0,
     assetIds: Object.keys(assetIds).length > 0 ? assetIds : void 0,
     options: parsedOptions
