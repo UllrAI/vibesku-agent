@@ -178,6 +178,7 @@ vibesku generate -t listing \
 | Flag | Description |
 |------|-------------|
 | `-t, --template <id>` | Template ID (required) |
+| `--job <id>` | Continue a `creative-ad-video` job after reviewing its storyboard |
 | `-n, --product-name <name>` | Product name |
 | `-d, --product-details <text>` | Product description |
 | `-b, --brand <name>` | Brand name |
@@ -186,7 +187,7 @@ vibesku generate -t listing \
 | `-o, --options <json>` | Template-specific options as JSON |
 | `--json` | Output as JSON |
 
-On success, displays remaining credit balance.
+On success, displays remaining credit balance. See [creative-ad-video.md](creative-ad-video.md) for its two-stage generation flow.
 
 ---
 
