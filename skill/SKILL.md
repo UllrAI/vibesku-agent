@@ -30,7 +30,7 @@ Command-line interface for [VibeSKU](https://www.vibesku.com) — AI-powered cre
 
 VibeSKU replaces manual creative production for e-commerce teams. Upload a product photo, define brand guidelines, and receive complete multi-format visual sets. Core capabilities: VisionKV™ visual system (complete visual collections from a single product), high-fidelity product restoration (1:1 precision on textures/logos/packaging), multilingual text overlays, and omni-channel format output.
 
-**Credit costs**: 1K/2K image = 1 credit, 4K image = 2 credits, video = 3 credits/second at 480p or 5 credits/second at 720p, copy = 1 credit.
+**Credit costs**: 1K = 1 credit, 2K = 2 credits, 4K = 4 credits, video = 3 credits/second at 480p or 5 credits/second at 720p, copy = 1 credit.
 
 ## Setup
 
@@ -71,15 +71,15 @@ VibeSKU provides 9 templates. **Read the corresponding reference file before bui
 
 | Need | Template | Output | Cost | Reference |
 |------|----------|--------|------|-----------|
-| Single product image (main photo, banner, poster) | `ecom-hero` | IMAGE | 1-2 cr/img | [ecom-hero.md](references/ecom-hero.md) |
-| Coordinated detail-page poster set | `kv-image-set` | IMAGE | 1-2 cr/img × scenes | [kv-image-set.md](references/kv-image-set.md) |
-| Single technical exploded infographic | `exploded-view` | IMAGE | 1-2 cr/img | [exploded-view.md](references/exploded-view.md) |
-| Translate text inside an existing image/poster | `image-translation` | IMAGE | 1-2 cr/img | [image-translation.md](references/image-translation.md) |
-| Product in a realistic usage scene | `lifestyle-scene` | IMAGE | 1-2 cr/img | [lifestyle-scene.md](references/lifestyle-scene.md) |
-| Clean white-background packshot | `white-background` | IMAGE | 1-2 cr/img | [white-background.md](references/white-background.md) |
+| Single product image (main photo, banner, poster) | `ecom-hero` | IMAGE | 1–4 cr/img | [ecom-hero.md](references/ecom-hero.md) |
+| Coordinated detail-page poster set | `kv-image-set` | IMAGE | 1–4 cr/img × scenes | [kv-image-set.md](references/kv-image-set.md) |
+| Single technical exploded infographic | `exploded-view` | IMAGE | 1–4 cr/img | [exploded-view.md](references/exploded-view.md) |
+| Translate text inside an existing image/poster | `image-translation` | IMAGE | 1–4 cr/img | [image-translation.md](references/image-translation.md) |
+| Product in a realistic usage scene | `lifestyle-scene` | IMAGE | 1–4 cr/img | [lifestyle-scene.md](references/lifestyle-scene.md) |
+| Clean white-background packshot | `white-background` | IMAGE | 1–4 cr/img | [white-background.md](references/white-background.md) |
 | Product listing copy (title, bullets, description) | `listing` | TEXT | 1 cr | [listing.md](references/listing.md) |
 | Short vertical UGC shopping video with spoken script | `ugc-video` | VIDEO | **3-5 cr/second** | [ugc-video.md](references/ugc-video.md) |
-| Absurdist brand commercial with a reviewed storyboard | `creative-ad-video` | VIDEO | **3–5 cr/second** + 2 cr for script/storyboard | [creative-ad-video.md](references/creative-ad-video.md) |
+| Absurdist brand commercial with a reviewed storyboard | `creative-ad-video` | VIDEO | **3–5 cr/second** + 3 cr for script/storyboard | [creative-ad-video.md](references/creative-ad-video.md) |
 
 ### Decision Tree
 
@@ -180,7 +180,7 @@ All commands support `--json` for machine-readable output. Full details: [comman
 
 - **Asset upload**: `-i` auto-uploads product images; `-l` uploads logo
 - **Modify vs Regenerate**: Use `vibesku refine <output-id> -p "<instruction>"` to edit existing output. Use `vibesku generate` only for new creations. **VIDEO outputs cannot be refined** — regenerate with different options instead.
-- **Per-second video billing**: `ugc-video` and `creative-ad-video` cost `durationSeconds × 3` (480p) or `× 5` (720p) credits — up to 75 for one clip. Confirm duration and resolution and state the total before generating. For `creative-ad-video`, review the storyboard before continuing the same job and include the 1-credit script and 1-credit storyboard in the quote.
+- **Per-second video billing**: `ugc-video` and `creative-ad-video` cost `durationSeconds × 3` (480p) or `× 5` (720p) credits — up to 75 for one clip. Confirm duration and resolution and state the total before generating. For `creative-ad-video`, review the storyboard before continuing the same job and include the 1-credit script and 2-credit storyboard in the quote.
 - **Full UUID required for refine**: Use `vibesku status <job-id> --json` to get complete output UUIDs (table view truncates them).
 - **Agent-friendly output**: Prefer `--json` flag for all commands when used by AI agents.
 - **Version drift check (recommended triggers)**: Compare local `VERSION` with upstream when any of these happen: unknown template/option error, template mismatch with `vibesku templates --json`, user asks for newly added capability, or local check is older than 7 days (recommended cadence). If issues occur during execution, prioritize this check before retrying generation/refine commands. Follow [versioning.md](references/versioning.md).

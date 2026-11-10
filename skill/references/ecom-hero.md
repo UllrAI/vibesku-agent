@@ -4,7 +4,7 @@
 
 **When to use**: User needs ONE image for a specific placement (storefront hero, ad banner, social post, product main photo).
 
-**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K = 1 credit, 2K = 2 credits, 4K = 4 credits
 
 ## Assets
 
@@ -21,7 +21,7 @@
 | `style` | string | `auto` | Visual style (see below) |
 | `customStyle` | string | — | Free-text style description (only when `style=custom`) |
 | `aspectRatio` | string | `1:1` | Output aspect ratio (e.g. `1:1`, `16:9`, `3:4`, `9:16`) |
-| `imageSize` | string | `2K` | Resolution: `1K`, `2K`, or `4K` (4K = 2 credits) |
+| `imageSize` | string | `2K` | Resolution: `1K`, `2K`, or `4K` (4K = 4 credits) |
 | `layoutMode` | string | `auto` | Text layout: `auto`, `stacked`, `side-by-side`, `diagonal` |
 | `primaryLang` | string | `en` | Primary text language code |
 | `secondaryLang` | string | `none` | Secondary language (`none` for monolingual) |

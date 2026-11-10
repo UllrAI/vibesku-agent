@@ -4,7 +4,7 @@
 
 **When to use**: User already has a finished image/poster and wants the text localized into another language without redesigning the asset from scratch.
 
-**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K/2K = 1 credit, 4K = 2 credits
+**Output type**: IMAGE | **Supports analysis**: No | **Cost**: 1K = 1 credit, 2K = 2 credits, 4K = 4 credits
 
 ## Assets
 
